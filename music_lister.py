@@ -1,10 +1,21 @@
 import os
+import re
 from html5builder import HTML5Builder
 
+# USER PARAM
+# Set the folder to search in here
 COMPOSITIONS_FOLDER="/mnt/c/Users/obrun/Music/Compositions"
+#####
 
+
+# Current script path
+CURRENT_SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
+DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
 
 class Composition:
+  """This class will hold the composition information.
+  It will look for an info file on disk, based on the ALS file path given."""
+
   name = None
   artist = None
   lyrics = None
@@ -14,9 +25,11 @@ class Composition:
 
   als_file_path = None
   project_dir = None
+  root_folder = None
 
-  def __init__(self, als_file_path):
+  def __init__(self, als_file_path, root_folder=None):
     self.als_file_path = als_file_path
+    self.root_folder = root_folder
     self.project_dir = os.path.dirname(als_file_path)
     self.name = os.path.basename(als_file_path)
     self.gather_composition_information()
@@ -37,7 +50,7 @@ class Composition:
       self.status = "Finished"
     else:
       self.rework = self.status
-      self.status = "Not finished"
+      self.status = "In Progress"
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
@@ -58,27 +71,35 @@ class Composition:
     list_of_elements = []
 
     list_of_elements.append(tag.h2(f"{self.artist+" - " if self.artist else ""}{self.name}"))
-    list_of_elements.append(tag.p(f"File path: {self.als_file_path}", cls="als_file_path"))
 
     list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
     if self.rework:
       list_of_elements.append(tag.p(f"Rework: {self.rework}", cls="rework"))
 
+    path_to_display = self.als_file_path
+    if self.root_folder:
+      path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
+    list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
+
     row1 = tag.tr([tag.th("Lyrics"), tag.th("Extra info")])
     row2 = tag.tr([tag.td(self.lyrics), tag.th(self.extra_info)])
-    list_of_elements.append(tag.table([row1, row2], border="0", cellpadding="5"))
+    summary = tag.summary("More info")
+    list_of_elements.append(tag.details([summary, tag.table([row1, row2], border="0", cellpadding="5")]))
     
-    composition_div_classes = ["composition"]
+    composition_div_classes = "composition"
     if Helpers.is_status_complete(self.status):
-      composition_div_classes.append("finished")
+      composition_div_classes += " finished"
     else:
-      composition_div_classes.append("unfinished")
+      composition_div_classes += " unfinished"
     total_div = tag.div(list_of_elements, cls=composition_div_classes)
 
     return str(total_div)
 
 
 class MusicLister:
+  """This class will look for Ableton Live Sets.
+  It will find them in the root_folder path."""
+
   root_folder = None
   output_html_file = None
   compositions = dict()
@@ -91,7 +112,7 @@ class MusicLister:
   
   def look_for_als(self, path):
     if Helpers.is_als(path):
-      self.compositions[path] = Composition(path)
+      self.compositions[path] = Composition(path, self.root_folder)
     
     if os.path.isfile(path):
       return
@@ -122,14 +143,19 @@ class MusicLister:
 
   def __html__(self):
     tag = HTML5Builder()
-    title = f"Music Lister - {os.path.basename(self.root_folder)}"
-    head = tag.head(tag.title(title))
+    title = tag.title(f"Music Lister - {os.path.basename(self.root_folder)}")
+    css = tag.link(href=Helpers.replace_wsl_disk_with_windows(DESIGN_FILE_PATH), rel="stylesheet")
+    meta = tag.meta(charset="UTF-8")
+    head = tag.head([title, css, meta])
 
     main_title = tag.h1(title)
-    detail1 = tag.li(f"Root folder: {self.root_folder}")
-    detail2 = tag.li(f"Output HTML file: {self.output_html_file}")
+
+    summary = tag.summary("About this list")
+    detail1 = tag.li(f"Root folder: {tag.span(Helpers.replace_wsl_disk_with_windows(self.root_folder), cls="file_path")}")
+    detail2 = tag.li(f"Output HTML file: {tag.span(Helpers.replace_wsl_disk_with_windows(self.output_html_file), cls="file_path")}")
     detail3 = tag.li(f"Number of compositions: {len(self.compositions)}")
-    details = tag.div([tag.ul([detail1, detail2, detail3])], cls="lister_details")
+    details_list = tag.ul([detail1, detail2, detail3])
+    details = tag.div(tag.details([summary, details_list]), cls="lister_details")
 
     compositions = tag.div('', cls="compositions")
     for name in self.compositions:
@@ -141,8 +167,9 @@ class MusicLister:
     return str(tag.doctype + str(doc))
     
 
-
 class Helpers:
+  """This helper class contains all basic functions as static."""
+
   @staticmethod
   def is_als(path):
     return os.path.isfile(path) and ".als" in path
@@ -187,6 +214,10 @@ class Helpers:
     if status in ["finished", "Finished", "FINISHED", "Complete"]:
       return True
     return False
+  
+  @staticmethod
+  def replace_wsl_disk_with_windows(path):
+    return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
 
 
 # Launch main code
