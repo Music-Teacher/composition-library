@@ -9,6 +9,8 @@ class Composition:
   artist = None
   lyrics = None
   extra_info = None
+  status = None
+  rework = None
 
   als_file_path = None
   project_dir = None
@@ -27,9 +29,21 @@ class Composition:
       self.artist = info.get("artist", None)
       self.lyrics = info.get("lyrics", None)
       self.extra_info = info.get("extra_info", None)
+      self.status = info.get("status", None)
+    self.make_proper_status()
+  
+  def make_proper_status(self):
+    if Helpers.is_status_complete(self.status):
+      self.status = "Finished"
+    else:
+      self.rework = self.status
+      self.status = "Not finished"
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
+    return_string += f" + Status: {self.status}\n"
+    if self.rework:
+      return_string += f" + Rework: {self.rework}\n"
     if self.lyrics:
       return_string += f" - Lyrics:\n"
       return_string += f"{self.lyrics}\n"
@@ -41,15 +55,25 @@ class Composition:
 
   def __html__(self):
     tag = HTML5Builder()
-    composition_title = tag.h2(f"{self.artist+" - " if self.artist else ""}{self.name}")
-    als_file_path = tag.p(f"File path: {self.als_file_path}")
+    list_of_elements = []
+
+    list_of_elements.append(tag.h2(f"{self.artist+" - " if self.artist else ""}{self.name}"))
+    list_of_elements.append(tag.p(f"File path: {self.als_file_path}", cls="als_file_path"))
+
+    list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
+    if self.rework:
+      list_of_elements.append(tag.p(f"Rework: {self.rework}", cls="rework"))
 
     row1 = tag.tr([tag.th("Lyrics"), tag.th("Extra info")])
     row2 = tag.tr([tag.td(self.lyrics), tag.th(self.extra_info)])
-
-    info_table = tag.table([row1, row2], border="0", cellpadding="5")
+    list_of_elements.append(tag.table([row1, row2], border="0", cellpadding="5"))
     
-    total_div = tag.div([composition_title, als_file_path, info_table], cls="composition")
+    composition_div_classes = ["composition"]
+    if Helpers.is_status_complete(self.status):
+      composition_div_classes.append("finished")
+    else:
+      composition_div_classes.append("unfinished")
+    total_div = tag.div(list_of_elements, cls=composition_div_classes)
 
     return str(total_div)
 
@@ -157,6 +181,12 @@ class Helpers:
           #ignoring line
           pass
     return fields
+
+  @staticmethod
+  def is_status_complete(status):
+    if status in ["finished", "Finished", "FINISHED", "Complete"]:
+      return True
+    return False
 
 
 # Launch main code
