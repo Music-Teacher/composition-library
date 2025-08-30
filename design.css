@@ -32,7 +32,7 @@ h1::before {
 /* ===== Info Panel (Secondary, collapsible) ===== */
 .lister_details {
   max-width: 800px;
-  margin: 0 auto 2rem;
+  margin: 0 auto 0;
   font-size: 0.85rem;
   color: #666;
 }
@@ -77,6 +77,43 @@ h1::before {
   font-style: italic;
 }
 
+/* ===== Sort and Filter Controls ===== */
+.controls {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  font-size: 0.85rem;
+  color: #666;
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+
+.controls div {
+  display: inline;
+}
+
+.controls .filter {
+  margin-left: 1rem;
+}
+
+.controls .filter input {
+  display: none;
+}
+
+.controls .filter input + span {
+  display: inline-block;
+  background: #999;
+  border-radius: 4px;
+  color: #FFF;
+  padding: 2px 8px;
+  cursor: pointer;
+  margin-right: 2px;
+}
+
+.controls .filter input:checked + span {
+  background: #000;
+  color: white;
+}
+
 /* ===== Compositions Grid ===== */
 .compositions {
   display: grid;
@@ -84,6 +121,12 @@ h1::before {
   gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
+}
+
+@media screen and (max-width: 800px) {
+  .compositions {
+    display:inline;
+  }
 }
 
 /* ===== Composition Card ===== */

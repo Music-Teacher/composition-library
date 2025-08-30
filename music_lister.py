@@ -3,7 +3,7 @@ import re
 import sys
 import threading
 import time
-from html5builder import HTML5Builder
+from html5builder import HTML5Builder, HTML5Element
 
 # USER PARAMETERS
 # Set the folder to search
@@ -13,6 +13,7 @@ COMPOSITIONS_FOLDER="/mnt/c/Users/obrun/Music/Compositions"
 # Current script path
 CURRENT_SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
 DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
+JS_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "sortfilter.js")
 
 # Timeout and update frequency
 APP_TIMEOUT = 60*60 # 1 hour
@@ -85,8 +86,11 @@ class Composition:
 
   def __html__(self):
     tag = HTML5Builder()
+    elem = HTML5Element
+
     list_of_elements = []
 
+    # Song properties
     list_of_elements.append(tag.h2(self.name, cls="songname"))
     list_of_elements.append(tag.h3(f"Artist: {self.artist}", cls="artist"))
     if self.ep:
@@ -94,15 +98,18 @@ class Composition:
     else:
       list_of_elements.append(tag.h3(f"Album: {self.album}", cls="album"))
 
+    # Status
     list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
     if self.rework:
       list_of_elements.append(tag.p(f"Rework: {self.rework}", cls="rework"))
 
+    # Path to project
     path_to_display = self.als_file_path
     if self.root_folder:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
     list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
 
+    # Extra details
     table_rows = [tag.tr([tag.th("Lyrics"), tag.td(self.lyrics)]),
                   tag.tr([tag.th("Chords"), tag.td(self.chords)])]
     if self.extra_info:
@@ -110,12 +117,21 @@ class Composition:
     summary = tag.summary("More info")
     list_of_elements.append(tag.details([summary, tag.table(table_rows, border="0", cellpadding="5")]))
     
+    # Assemble all elements
     composition_div_classes = "composition"
+    data_status = ""
     if Helpers.is_status_complete(self.status):
       composition_div_classes += " finished"
+      data_status = "finished"
     else:
       composition_div_classes += " unfinished"
-    total_div = tag.div(list_of_elements, cls=composition_div_classes)
+      data_status = "unfinished"
+    total_div = elem('div', list_of_elements,
+                    {'class': composition_div_classes,
+                     'data-status': data_status,
+                     'data-title': self.name,
+                     'data-album': self.album or self.ep or '',
+                     'data-artist': self.artist or ''})
 
     return str(total_div)
 
@@ -168,13 +184,17 @@ class MusicLister:
 
   def __html__(self):
     tag = HTML5Builder()
+    elem = HTML5Element
+
     title = tag.title(f"Music Lister - {os.path.basename(self.root_folder)}")
     css = tag.link(href=Helpers.replace_wsl_disk_with_windows(DESIGN_FILE_PATH), rel="stylesheet")
+    js = tag.script('', src=Helpers.replace_wsl_disk_with_windows(JS_FILE_PATH), type="text/javascript")
     meta = tag.meta(charset="UTF-8")
     head = tag.head([title, css, meta])
 
     main_title = tag.h1(title)
 
+    # Details of music lister
     summary = tag.summary("About this list")
     detail1 = tag.li(f"Root folder: {tag.span(Helpers.replace_wsl_disk_with_windows(self.root_folder), cls="file_path")}")
     detail2 = tag.li(f"Output HTML file: {tag.span(Helpers.replace_wsl_disk_with_windows(self.output_html_file), cls="file_path")}")
@@ -182,11 +202,32 @@ class MusicLister:
     details_list = tag.ul([detail1, detail2, detail3])
     details = tag.div(tag.details([summary, details_list]), cls="lister_details")
 
+    # Sort and filter options
+    #sort
+    empty_sort = elem("option", ["---"], {'disabled':'', 'selected':''})
+    status_sort = tag.option("Status", value="status")
+    title_sort = tag.option("Title", value="title")
+    artist_sort = tag.option("Artist", value="artist")
+    album_sort = tag.option("Album", value="album")
+    sort_select = tag.select([empty_sort, status_sort, title_sort, artist_sort, album_sort], id="sortSelect")
+    label_for_sort = elem("label", "Sort by: ", {"for": "sortSelect"})
+    #filter
+    input_finished = tag.input('', id='showFinished', type='checkbox')
+    label_for_finished = elem("label", [input_finished, tag.span("Finished")], {})
+    input_notfinished = tag.input('', id='showNotFinished', type='checkbox')
+    label_for_notfinished = elem("label", [input_notfinished, tag.span("In Progress")], {})
+    #assemble controls
+    controls = tag.div([tag.div([label_for_sort, sort_select], cls="sort"),
+                        tag.div(["Only show: ", label_for_finished, label_for_notfinished], cls="filter")],
+                        cls="controls")
+
+    # Compositions
     compositions = tag.div('', cls="compositions")
     for name in self.compositions:
       compositions.child.append(self.compositions[name].__html__())
 
-    body = tag.body([main_title, details, compositions])
+    # Assemble it all together
+    body = tag.body([main_title, details, controls, compositions, js])
 
     doc = tag.html([head, body], lang='html')
     return str(tag.doctype + str(doc))
