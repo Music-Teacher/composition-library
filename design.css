@@ -169,19 +169,23 @@ h1::before {
 }
 
 /* ===== File path wrapping ===== */
-.als_file_path {
+.activity_path {
   font-size: 0.8rem;
   color: #666;
   margin-bottom: 0.5rem;
   overflow-wrap: anywhere;
 }
 
-.als_file_path::before {
-  content: "🗀 ";
+.activity_path span {
+  font-style: italic;
 }
 
-.als_file_path .file_path {
-  font-style: italic;
+.last_activity::before {
+  content: "⏱ ";
+}
+
+.als_file_path::before {
+  content: "🗀 ";
 }
 
 /* ===== Status with Emoji ===== */

@@ -2,6 +2,7 @@ import os
 import re
 import sys
 import threading
+import datetime
 import time
 from html5builder import HTML5Builder, HTML5Element
 
@@ -36,12 +37,15 @@ class Composition:
   project_dir = None
   root_folder = None
   als_file_name = None
+  last_activity = None
 
   def __init__(self, als_file_path, root_folder=None):
     self.als_file_path = als_file_path
     self.root_folder = root_folder
     self.project_dir = os.path.dirname(als_file_path)
     self.als_file_name = os.path.basename(als_file_path)
+    modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
+    self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
     self.gather_composition_information()
 
   def gather_composition_information(self):
@@ -67,6 +71,7 @@ class Composition:
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
+    return_string += f"Last activity: {self.last_activity}"
     if self.album:
       return_string += f"-- Album: {self.album}"
     return_string += f" + Status: {self.status}\n"
@@ -103,11 +108,14 @@ class Composition:
     if self.rework:
       list_of_elements.append(tag.p(f"Rework: {self.rework}", cls="rework"))
 
-    # Path to project
+    # Last activity and path to project
+    last_activity = tag.p(f"Last modified: {str(tag.span(self.last_activity))}", cls="last_activity")
     path_to_display = self.als_file_path
     if self.root_folder:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
-    list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
+    file_path = tag.p(f"File path: {str(tag.span(path_to_display))}", cls="als_file_path")
+    activity_path_div = tag.div([last_activity, file_path], cls="activity_path")
+    list_of_elements.append(activity_path_div)
 
     # Extra details
     table_rows = [tag.tr([tag.th("Lyrics"), tag.td(self.lyrics)]),
@@ -128,6 +136,7 @@ class Composition:
       data_status = "unfinished"
     total_div = elem('div', list_of_elements,
                     {'class': composition_div_classes,
+                     'data-activity': self.last_activity,
                      'data-status': data_status,
                      'data-title': self.name,
                      'data-album': self.album or self.ep or '',
@@ -204,12 +213,13 @@ class MusicLister:
 
     # Sort and filter options
     #sort
-    empty_sort = elem("option", ["---"], {'disabled':'', 'selected':''})
+    # empty_sort = elem("option", ["---"], {'disabled':'', 'selected':''})
+    activity_sort = tag.option("Last activity", value="activity")
     status_sort = tag.option("Status", value="status")
     title_sort = tag.option("Title", value="title")
     artist_sort = tag.option("Artist", value="artist")
     album_sort = tag.option("Album", value="album")
-    sort_select = tag.select([empty_sort, status_sort, title_sort, artist_sort, album_sort], id="sortSelect")
+    sort_select = tag.select([activity_sort, status_sort, title_sort, artist_sort, album_sort], id="sortSelect")
     label_for_sort = elem("label", "Sort by: ", {"for": "sortSelect"})
     #filter
     input_finished = tag.input('', id='showFinished', type='checkbox')

@@ -1,14 +1,12 @@
 //
 // Sorting
 //
+
 const list = document.querySelector('.compositions');
 const select = document.getElementById('sortSelect');
 
 select.addEventListener('change', () => {
   const sortBy = select.value;
-  if (sortBy == "none") {
-    return;
-  }
   const items = Array.from(list.querySelectorAll('.composition'));
 
   items.sort((a, b) => {
@@ -19,11 +17,20 @@ select.addEventListener('change', () => {
     } else if(!bVal) {
       return -1;
     }
-    return aVal.localeCompare(bVal);
+    if(sortBy == "activity") { // Descending
+      return bVal.localeCompare(aVal);
+    }
+    return aVal.localeCompare(bVal); // Ascending
   });
 
   items.forEach(item => list.appendChild(item));
 });
+
+// Select last activity sorting by default
+window.onload = function() {
+  document.getElementById("sortSelect").value = "activity";
+  document.getElementById("sortSelect").dispatchEvent(new Event('change'));
+};
 
 //
 // Filtering
