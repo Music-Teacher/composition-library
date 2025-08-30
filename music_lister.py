@@ -320,3 +320,4 @@ if __name__ == "__main__":
     main_thread.join(APP_TIMEOUT)
     e.set()
     main_thread.join()
+    print("Program music_lister stopped.")
