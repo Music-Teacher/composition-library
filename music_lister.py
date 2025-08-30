@@ -24,10 +24,12 @@ class Composition:
 
   name = None
   artist = None
+  album = None
   lyrics = None
   extra_info = None
   status = None
   rework = None
+  ep = None
 
   als_file_path = None
   project_dir = None
@@ -47,6 +49,8 @@ class Composition:
       info = Helpers.get_fields_from_file(info_file_path)
       self.name = info.get("name", self.als_file_name) or self.als_file_name
       self.artist = info.get("artist", None) or None
+      self.album = info.get("album", None) or None
+      self.ep = info.get("ep", None) or None
       self.lyrics = info.get("lyrics", None) or None
       self.extra_info = info.get("extra_info", None) or None
       self.chords = info.get("chords", None) or None
@@ -54,7 +58,7 @@ class Composition:
     self.make_proper_status()
   
   def make_proper_status(self):
-    if Helpers.is_status_complete(self.status):
+    if self.status and Helpers.is_status_complete(self.status):
       self.status = "Finished"
     else:
       self.rework = self.status
@@ -62,6 +66,8 @@ class Composition:
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
+    if self.album:
+      return_string += f"-- Album: {self.album}"
     return_string += f" + Status: {self.status}\n"
     if self.rework:
       return_string += f" + Rework: {self.rework}\n"
@@ -81,7 +87,12 @@ class Composition:
     tag = HTML5Builder()
     list_of_elements = []
 
-    list_of_elements.append(tag.h2(f"{self.artist+" - " if self.artist else ""}{self.name}"))
+    list_of_elements.append(tag.h2(self.name, cls="songname"))
+    list_of_elements.append(tag.h3(f"Artist: {self.artist}", cls="artist"))
+    if self.ep:
+      list_of_elements.append(tag.h3(f"EP: {self.ep}", cls="album"))
+    else:
+      list_of_elements.append(tag.h3(f"Album: {self.album}", cls="album"))
 
     list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
     if self.rework:
@@ -92,15 +103,12 @@ class Composition:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
     list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
 
-    table_row1 = [tag.th("Lyrics"), tag.th("Chords")]
-    table_row2 = [tag.td(self.lyrics), tag.td(self.chords)]
+    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(self.lyrics)]),
+                  tag.tr([tag.th("Chords"), tag.td(self.chords)])]
     if self.extra_info:
-      table_row1.append(tag.th("Extra"))
-      table_row1.append(tag.td(self.extra_info))
-    row1 = tag.tr(table_row1)
-    row2 = tag.tr(table_row2)
+      table_row.append(tag.tr([tag.th("Extra"), tag.td(self.extra_info)]))
     summary = tag.summary("More info")
-    list_of_elements.append(tag.details([summary, tag.table([row1, row2], border="0", cellpadding="5")]))
+    list_of_elements.append(tag.details([summary, tag.table(table_rows, border="0", cellpadding="5")]))
     
     composition_div_classes = "composition"
     if Helpers.is_status_complete(self.status):
@@ -228,7 +236,9 @@ class Helpers:
 
   @staticmethod
   def is_status_complete(status):
-    if status in ["finished", "Finished", "FINISHED", "Complete"]:
+    pattern = r'(?i)^(?:finished|complete|completed)$'
+    match = re.findall(pattern, status.rstrip())
+    if match:
       return True
     return False
   

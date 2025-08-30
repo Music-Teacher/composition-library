@@ -101,10 +101,28 @@ h1::before {
   background-color: #f6f6f6;
 }
 
-.composition h2 {
+.composition .songname {
   font-size: 1.1rem;
   margin-bottom: 0.3rem;
   word-break: break-word;
+}
+
+.composition h3 {
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+}
+
+.composition .album::before {
+  content: "💿 ";
+}
+
+.composition .ep::before {
+  content: "+ ";
+}
+
+.composition .artist::before {
+  content: "👤 ";
 }
 
 /* ===== File path wrapping ===== */
@@ -129,13 +147,15 @@ h1::before {
   margin-bottom: 0.5rem;
 }
 
-.composition.unfinished .status::before {
-  content: "🚧 ";
+.composition.unfinished .status {
   color: #d33;
 }
 
-.composition.finished .status::before {
-  content: "✅ ";
+.composition.unfinished .status::after {
+  content: " 🚧";
+}
+
+.composition.finished .status {
   color: #2ecc71;
 }
 

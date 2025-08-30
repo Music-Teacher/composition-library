@@ -15,7 +15,10 @@ export -f process
 
 export DEFAULT_TEXT="""artist:
 name:
+album:
+ep:
 status:
+chords:
 lyrics:
 extra_info:"""
 
