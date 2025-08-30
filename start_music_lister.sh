@@ -11,7 +11,7 @@ Usage:
   $program_name once|periodically
   Options:
     once: Run the program once
-    periodic: Run the program periodically in the background
+    periodically: Run the program periodically in the background
 EOF
 )
 
