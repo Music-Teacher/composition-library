@@ -60,9 +60,9 @@ class Composition:
       self.extra_info = info.get("extra_info", None) or None
       self.chords = info.get("chords", None) or None
       self.status = info.get("status", None) or None
-    self.make_proper_status()
+    self.make_proper_info()
   
-  def make_proper_status(self):
+  def make_proper_info(self):
     if self.status and Helpers.is_status_complete(self.status):
       self.status = "Finished"
     else:
@@ -118,10 +118,10 @@ class Composition:
     list_of_elements.append(activity_path_div)
 
     # Extra details
-    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(self.lyrics)]),
-                  tag.tr([tag.th("Chords"), tag.td(self.chords)])]
+    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(Helpers.place_html_newlines(self.lyrics))]),
+                  tag.tr([tag.th("Chords"), tag.td(Helpers.place_html_newlines(self.chords))])]
     if self.extra_info:
-      table_row.append(tag.tr([tag.th("Extra"), tag.td(self.extra_info)]))
+      table_row.append(tag.tr([tag.th("Extra"), tag.td(Helpers.place_html_newlines(self.extra_info))]))
     summary = tag.summary("More info")
     list_of_elements.append(tag.details([summary, tag.table(table_rows, border="0", cellpadding="5")]))
     
@@ -274,21 +274,33 @@ class Helpers:
   @staticmethod
   def get_fields_from_file(path):
     fields = dict()
+
+    # Function to save field
+    def save_field(filed_name, field_value):
+      if field_name and field_value:
+        fields[field_name.strip()] = field_value.strip()
+
     with open(path) as file:
+      field_name = None
+      field_value = None
       for line in file:
-        line = line.rstrip()
+        line = line.strip()
         try:
           key, value = line.split(':', 1)
-          fields[key] = value
+          save_field(field_name, field_value)
+          field_name = key
+          field_value = value
         except:
-          #ignoring line
+          if field_name:
+            field_value += f"\n{line}"
           pass
+      save_field(field_name, field_value)
     return fields
 
   @staticmethod
   def is_status_complete(status):
     pattern = r'(?i)^(?:finished|complete|completed)$'
-    match = re.findall(pattern, status.rstrip())
+    match = re.findall(pattern, status.strip())
     if match:
       return True
     return False
@@ -296,6 +308,13 @@ class Helpers:
   @staticmethod
   def replace_wsl_disk_with_windows(path):
     return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
+
+  @staticmethod
+  def place_html_newlines(text):
+    tag = HTML5Builder
+    if text:
+      return text.strip().replace("\n","<br/>")
+    return None
 
 
 # Main code
