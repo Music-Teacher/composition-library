@@ -1,16 +1,22 @@
 import os
 import re
+import sys
+import threading
+import time
 from html5builder import HTML5Builder
 
-# USER PARAM
-# Set the folder to search in here
+# USER PARAMETERS
+# Set the folder to search
 COMPOSITIONS_FOLDER="/mnt/c/Users/obrun/Music/Compositions"
 #####
-
 
 # Current script path
 CURRENT_SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
 DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
+
+# Timeout and update frequency
+APP_TIMEOUT = 60*60 # 1 hour
+UPDATE_FREQUENCY = 20 # 20 seconds
 
 class Composition:
   """This class will hold the composition information.
@@ -42,6 +48,7 @@ class Composition:
       self.artist = info.get("artist", None) or None
       self.lyrics = info.get("lyrics", None) or None
       self.extra_info = info.get("extra_info", None) or None
+      self.chords = info.get("chords", None) or None
       self.status = info.get("status", None) or None
     self.make_proper_status()
   
@@ -57,6 +64,9 @@ class Composition:
     return_string += f" + Status: {self.status}\n"
     if self.rework:
       return_string += f" + Rework: {self.rework}\n"
+    if self.chords:
+      return_string += f" - Chords:\n"
+      return_string += f"{self.chords}\n"
     if self.lyrics:
       return_string += f" - Lyrics:\n"
       return_string += f"{self.lyrics}\n"
@@ -81,8 +91,8 @@ class Composition:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
     list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
 
-    row1 = tag.tr([tag.th("Lyrics"), tag.th("Extra info")])
-    row2 = tag.tr([tag.td(self.lyrics), tag.th(self.extra_info)])
+    row1 = tag.tr([tag.th("Lyrics"), tag.th("Extra info"), tag.th("Chords")])
+    row2 = tag.tr([tag.td(self.lyrics), tag.td(self.chords), tag.td(self.extra_info)])
     summary = tag.summary("More info")
     list_of_elements.append(tag.details([summary, tag.table([row1, row2], border="0", cellpadding="5")]))
     
@@ -125,8 +135,9 @@ class MusicLister:
         continue
       self.look_for_als(next_path)
 
-  def export(self):
-    print(f"Exporting to: {self.output_html_file}")
+  def export(self, silent=False):
+    if not silent:
+      print(f"Exporting HTML library to: {self.output_html_file}")
     file = open(self.output_html_file, 'w')
     file.write(self.__html__())
     file.close()
@@ -220,7 +231,35 @@ class Helpers:
     return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
 
 
-# Launch main code
-if __name__ == "__main__":
+# Main code
+def main_code(silent=False):
   ml = MusicLister(COMPOSITIONS_FOLDER)
-  ml.export()
+  ml.export(silent)
+
+def main_thread(frequency):
+  while True:
+    if e.is_set():
+      break
+    main_code(silent=True)
+    time.sleep(frequency)
+
+if __name__ == "__main__":
+  if not (len(sys.argv) >= 1 and sys.argv[1] in ['once', 'periodically']):
+    print("Usage:")
+    print("  python music_lister.py once|periodically")
+    print("  Options:")
+    print("    once: Run the program once")
+    print("    periodic: Run the program periodically in the background")
+    sys.exit(2)
+
+  print("Starting music_lister...")
+  if sys.argv[1] == "once":
+    main_code()
+  elif sys.argv[1] == "periodically":
+    main_thread = threading.Thread(target=main_thread, args=(UPDATE_FREQUENCY,))
+    e = threading.Event()
+    main_thread.start()
+    print(f"Program running periodically with timeout {APP_TIMEOUT}s and frequency {UPDATE_FREQUENCY}s.")
+    main_thread.join(APP_TIMEOUT)
+    e.set()
+    main_thread.join()
