@@ -92,8 +92,13 @@ class Composition:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
     list_of_elements.append(tag.p(f"File path: {str(tag.span(path_to_display, cls="file_path"))}", cls="als_file_path"))
 
-    row1 = tag.tr([tag.th("Lyrics"), tag.th("Chords"), tag.th("Extra")])
-    row2 = tag.tr([tag.td(self.lyrics), tag.td(self.chords), tag.td(self.extra_info)])
+    table_row1 = [tag.th("Lyrics"), tag.th("Chords")]
+    table_row2 = [tag.td(self.lyrics), tag.td(self.chords)]
+    if self.extra_info:
+      table_row1.append(tag.th("Extra"))
+      table_row1.append(tag.td(self.extra_info))
+    row1 = tag.tr(table_row1)
+    row2 = tag.tr(table_row2)
     summary = tag.summary("More info")
     list_of_elements.append(tag.details([summary, tag.table([row1, row2], border="0", cellpadding="5")]))
     
