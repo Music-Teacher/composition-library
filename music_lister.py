@@ -38,11 +38,11 @@ class Composition:
     info_file_path = Helpers.get_info_file_related_to_als(self.als_file_path)
     if info_file_path:
       info = Helpers.get_fields_from_file(info_file_path)
-      self.name = info.get("name", None)
-      self.artist = info.get("artist", None)
-      self.lyrics = info.get("lyrics", None)
-      self.extra_info = info.get("extra_info", None)
-      self.status = info.get("status", None)
+      self.name = info.get("name", None) or None
+      self.artist = info.get("artist", None) or None
+      self.lyrics = info.get("lyrics", None) or None
+      self.extra_info = info.get("extra_info", None) or None
+      self.status = info.get("status", None) or None
     self.make_proper_status()
   
   def make_proper_status(self):
