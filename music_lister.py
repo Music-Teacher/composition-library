@@ -32,19 +32,20 @@ class Composition:
   als_file_path = None
   project_dir = None
   root_folder = None
+  als_file_name = None
 
   def __init__(self, als_file_path, root_folder=None):
     self.als_file_path = als_file_path
     self.root_folder = root_folder
     self.project_dir = os.path.dirname(als_file_path)
-    self.name = os.path.basename(als_file_path)
+    self.als_file_name = os.path.basename(als_file_path)
     self.gather_composition_information()
 
   def gather_composition_information(self):
     info_file_path = Helpers.get_info_file_related_to_als(self.als_file_path)
     if info_file_path:
       info = Helpers.get_fields_from_file(info_file_path)
-      self.name = info.get("name", None) or None
+      self.name = info.get("name", self.als_file_name) or self.als_file_name
       self.artist = info.get("artist", None) or None
       self.lyrics = info.get("lyrics", None) or None
       self.extra_info = info.get("extra_info", None) or None
