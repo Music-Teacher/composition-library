@@ -249,7 +249,7 @@ if __name__ == "__main__":
     print("  python music_lister.py once|periodically")
     print("  Options:")
     print("    once: Run the program once")
-    print("    periodic: Run the program periodically in the background")
+    print("    periodically: Run the program periodically in the background")
     sys.exit(2)
 
   print("Starting music_lister...")
