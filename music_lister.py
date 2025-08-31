@@ -135,7 +135,8 @@ class Composition:
     #audio file details
     if self.is_finished():
       audio_text = "exported" if self.audio_file else "not exported"
-      audio_generated = tag.p(f"Sound file {audio_text}", cls="audio_file")
+      audio_class = "audio_file" if self.audio_file else "audio_file not_exported"
+      audio_generated = tag.p(f"Sound file {audio_text}", cls=audio_class)
       activity_path_elements.append(audio_generated)
     activity_path_div = tag.div(activity_path_elements, cls="activity_path")
     list_of_elements.append(activity_path_div)

@@ -189,7 +189,11 @@ h1::before {
 }
 
 .audio_file::before {
-  content: "▷ "
+  content: "▷ ";
+}
+
+.audio_file.not_exported {
+  font-weight: bold;
 }
 
 /* ===== Status with Emoji ===== */
