@@ -27,16 +27,18 @@ class Composition:
   name = None
   artist = None
   album = None
+  ep = None
   lyrics = None
+  chords = None
   extra_info = None
   status = None
   rework = None
-  ep = None
 
   als_file_path = None
   project_dir = None
   root_folder = None
   als_file_name = None
+  audio_file = None
   last_activity = None
 
   def __init__(self, als_file_path, root_folder=None):
@@ -46,6 +48,7 @@ class Composition:
     self.als_file_name = os.path.basename(als_file_path)
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
+    self.audio_file = Helpers.get_audio_file_related_to_als(self.als_file_path)
     self.gather_composition_information()
 
   def gather_composition_information(self):
@@ -65,9 +68,13 @@ class Composition:
   def make_proper_info(self):
     if self.status and Helpers.is_status_complete(self.status):
       self.status = "Finished"
+      self.rework = None
     else:
       self.rework = self.status
       self.status = "In Progress"
+  
+  def is_finished(self):
+    return self.status == "Finished"
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
@@ -87,6 +94,8 @@ class Composition:
       return_string += f" - Extra Info:\n"
       return_string += f"{self.extra_info}\n"
     return_string += f"{self.als_file_path}\n\n"
+    audio_generated = "exported" if self.audio_file else "not exported"
+    return_string += f" -> Audio file {audio_generated}"
     return return_string
 
   def __html__(self):
@@ -105,23 +114,37 @@ class Composition:
 
     # Status
     list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
-    if self.rework:
-      list_of_elements.append(tag.p(f"Rework: {self.rework}", cls="rework"))
+    if not self.is_finished():
+      rework_transform = Helpers.place_html_newlines(self.rework)
+      rework_class = "rework"
+      if rework_transform["multiple_lines"]:
+        rework_class += " rework_multiple_lines"
+      list_of_elements.append(tag.p(f"{str(tag.span("Rework: "))}{str(tag.span(rework_transform["html"]))}", cls=rework_class))
 
     # Last activity and path to project
+    activity_path_elements = []
+    #last activity
     last_activity = tag.p(f"Last modified: {str(tag.span(self.last_activity))}", cls="last_activity")
+    activity_path_elements.append(last_activity)
+    #als project file path
     path_to_display = self.als_file_path
     if self.root_folder:
       path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
     file_path = tag.p(f"File path: {str(tag.span(path_to_display))}", cls="als_file_path")
-    activity_path_div = tag.div([last_activity, file_path], cls="activity_path")
+    activity_path_elements.append(file_path)
+    #audio file details
+    if self.is_finished():
+      audio_text = "exported" if self.audio_file else "not exported"
+      audio_generated = tag.p(f"Sound file {audio_text}", cls="audio_file")
+      activity_path_elements.append(audio_generated)
+    activity_path_div = tag.div(activity_path_elements, cls="activity_path")
     list_of_elements.append(activity_path_div)
 
     # Extra details
-    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(Helpers.place_html_newlines(self.lyrics))]),
-                  tag.tr([tag.th("Chords"), tag.td(Helpers.place_html_newlines(self.chords))])]
+    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(Helpers.place_html_newlines(self.lyrics)["html"])]),
+                  tag.tr([tag.th("Chords"), tag.td(Helpers.place_html_newlines(self.chords)["html"])])]
     if self.extra_info:
-      table_row.append(tag.tr([tag.th("Extra"), tag.td(Helpers.place_html_newlines(self.extra_info))]))
+      table_row.append(tag.tr([tag.th("Extra"), tag.td(Helpers.place_html_newlines(self.extra_info)["html"])]))
     summary = tag.summary("More info")
     list_of_elements.append(tag.details([summary, tag.table(table_rows, border="0", cellpadding="5")]))
     
@@ -272,6 +295,13 @@ class Helpers:
     return None
 
   @staticmethod
+  def get_audio_file_related_to_als(path):
+    file_path = path.replace(".als", ".wav")
+    if os.path.isfile(file_path):
+      return file_path
+    return None
+
+  @staticmethod
   def get_fields_from_file(path):
     fields = dict()
 
@@ -312,9 +342,13 @@ class Helpers:
   @staticmethod
   def place_html_newlines(text):
     tag = HTML5Builder
-    if text:
-      return text.strip().replace("\n","<br/>")
-    return None
+    return_dict = {"html": text, "multiple_lines": False}
+    HTML_NEW_LINE = "<br/>"
+    if return_dict["html"]:
+      return_dict["html"] = return_dict["html"].strip().replace("\n", HTML_NEW_LINE)
+      if HTML_NEW_LINE in return_dict["html"]:
+        return_dict["multiple_lines"] = True
+    return return_dict
 
 
 # Main code

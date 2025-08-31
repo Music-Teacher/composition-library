@@ -161,7 +161,7 @@ h1::before {
 }
 
 .composition .ep::before {
-  content: "+ ";
+  content: "  + ";
 }
 
 .composition .artist::before {
@@ -188,6 +188,10 @@ h1::before {
   content: "🗀 ";
 }
 
+.audio_file::before {
+  content: "▷ "
+}
+
 /* ===== Status with Emoji ===== */
 .status {
   font-weight: 600;
@@ -206,8 +210,25 @@ h1::before {
   color: #2ecc71;
 }
 
+.rework_multiple_lines span:first-of-type::after {
+  content: "⮧";
+}
+
+.rework_multiple_lines span:last-of-type {
+  margin-left: 5%;
+  padding-left: 3%;
+  display: block;
+  border-left: 1px solid #ddd;
+  font-size: 0.9em;
+}
+
+.rework span:last-of-type {
+  padding: 0 2%;
+  background: #fafafa;
+}
+
 .rework::before {
-  content: "📝 ";
+  content: "🔁 ";
   color: #e67e22;
 }
 
