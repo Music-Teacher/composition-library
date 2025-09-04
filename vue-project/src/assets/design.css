@@ -1,0 +1,305 @@
+/* ===== Reset & Base ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  background: #fff; /* pure flat white */
+  color: #222;
+  line-height: 1.6;
+  padding: 1rem;
+}
+
+/* ===== Header ===== */
+h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  letter-spacing: -0.5px;
+}
+
+h1::before {
+  content: '🎵 ';
+  font-size: 1.5em;
+  vertical-align: middle;
+}
+
+/* ===== Info Panel (Secondary, collapsible) ===== */
+.lister_details {
+  max-width: 800px;
+  margin: 0 auto 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.lister_details details {
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+
+.lister_details summary {
+  font-weight: 500;
+  color: #0077ff;
+  cursor: pointer;
+  list-style: none;
+}
+
+.lister_details summary::after {
+  content: ' ➕';
+  color: #0077ff;
+}
+
+.lister_details details[open] summary::after {
+  content: ' ➖';
+  color: #2ecc71;
+}
+
+.lister_details ul {
+  margin-top: 0.5rem;
+  list-style: none;
+}
+
+.lister_details li {
+  margin: 0.3rem 0;
+}
+
+.lister_details li::before {
+  content: 'ℹ️ ';
+}
+
+.lister_details .file_path {
+  font-style: italic;
+}
+
+/* ===== Sort and Filter Controls ===== */
+.controls {
+  max-width: 800px;
+  margin: 0 auto 2rem;
+  font-size: 0.85rem;
+  color: #666;
+  border-bottom: 1px solid #eee;
+  padding: 0.5rem 0;
+}
+
+.controls div {
+  display: inline;
+}
+
+.controls .filter {
+  margin-left: 1rem;
+}
+
+.controls .filter input {
+  display: none;
+}
+
+.controls .filter input + span {
+  display: inline-block;
+  background: #999;
+  border-radius: 4px;
+  color: #fff;
+  padding: 2px 8px;
+  cursor: pointer;
+  margin-right: 2px;
+}
+
+.controls .filter input:checked + span {
+  background: #000;
+  color: white;
+}
+
+/* ===== Compositions Grid ===== */
+.compositions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media screen and (max-width: 800px) {
+  .compositions {
+    display: inline;
+  }
+}
+
+/* ===== Composition Card ===== */
+.composition {
+  padding: 1rem;
+  border-bottom: 1px solid #eee; /* only divider */
+  -webkit-transition: background-color 0.5s;
+  -moz-transition: background-color 0.5s;
+  -ms-transition: background-color 0.5s;
+  -o-transition: background-color 0.5s;
+  transition: background-color 0.5s;
+}
+
+.composition:hover {
+  background-color: #f6f6f6;
+}
+
+.composition .songname {
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+}
+
+.composition h3 {
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+  word-break: break-word;
+}
+
+.composition .album::before {
+  content: '💿 ';
+}
+
+.composition .ep::before {
+  content: '  + ';
+}
+
+.composition .artist::before {
+  content: '👤 ';
+}
+
+/* ===== File path wrapping ===== */
+.activity_path {
+  font-size: 0.8rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.activity_path span {
+  font-style: italic;
+}
+
+.last_activity::before {
+  content: '⏱ ';
+}
+
+.als_file_path::before {
+  content: '🗀 ';
+}
+
+.audio_file::before {
+  content: '▷ ';
+}
+
+.audio_file.not_exported {
+  font-weight: bold;
+}
+
+/* ===== Status with Emoji ===== */
+.status {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.composition.unfinished .status {
+  color: #d33;
+}
+
+.composition.unfinished .status::after {
+  content: ' 🚧';
+}
+
+.composition.finished .status {
+  color: #2ecc71;
+}
+
+.rework_multiple_lines span:first-of-type::after {
+  content: '⮧';
+}
+
+.rework_multiple_lines span:last-of-type {
+  margin-left: 5%;
+  padding-left: 3%;
+  display: block;
+  border-left: 1px solid #ddd;
+  font-size: 0.9em;
+}
+
+.rework span:last-of-type {
+  padding: 0 2%;
+  background: #fafafa;
+}
+
+.rework::before {
+  content: '🔁 ';
+  color: #e67e22;
+}
+
+/* ===== Finished Composition Styling ===== */
+.composition.finished {
+  background: #fafffa;
+  border-left: 3px solid #2ecc71;
+  padding-left: 0.7rem;
+}
+
+.composition.finished:hover {
+  background-color: #ebffeb;
+}
+
+/* ===== Collapsible Extra Info (click to open) ===== */
+details {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+details summary {
+  font-weight: 500;
+  color: #0077ff;
+  cursor: pointer;
+  margin-bottom: 0.3rem;
+}
+
+details summary::after {
+  content: ' ➕';
+  color: #0077ff;
+}
+
+details[open] summary::after {
+  content: ' ➖';
+  color: #2ecc71;
+}
+
+details table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.3rem;
+}
+
+details th,
+details td {
+  padding: 0.2rem 0.3rem;
+  text-align: left;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: top;
+}
+
+details th {
+  font-weight: 600;
+  color: #444;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  body {
+    padding: 0.5rem;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .composition {
+    padding: 0.8rem;
+  }
+}

@@ -1,9 +1,11 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import About from '../components/About.vue'
+import CompositionGrid from '../components/CompositionGrid.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <About />
+    <CompositionGrid />
   </main>
 </template>
