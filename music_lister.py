@@ -207,7 +207,7 @@ class MusicLister:
     assert os.path.isdir(root_folder)
     self.root_folder = root_folder
     self.output_html_file = os.path.join(root_folder, "index.html")
-    self.output_json_file = os.path.join(root_folder, "database.json")
+    self.output_json_file = os.path.abspath(os.path.join("database", "database.json"))
     self.look_for_als(root_folder)
   
   def look_for_als(self, path):
@@ -305,8 +305,10 @@ class MusicLister:
     j["root_folder"] = self.root_folder
     j["output_json_file"] = self.output_json_file
     j["compositions"] = dict()
+    id = 0
     for name in self.compositions:
-      j["compositions"][name] = self.compositions[name].__json__()
+      j["compositions"][id] = self.compositions[name].__json__()
+      id = id + 1
     
     if python:
       return j

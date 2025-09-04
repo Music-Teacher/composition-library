@@ -202,11 +202,11 @@ h1::before {
   margin-bottom: 0.5rem;
 }
 
-.composition.unfinished .status {
+.composition .status {
   color: #d33;
 }
 
-.composition.unfinished .status::after {
+.composition .status::after {
   content: ' 🚧';
 }
 

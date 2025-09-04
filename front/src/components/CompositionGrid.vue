@@ -1,4 +1,7 @@
 <script setup>
+import CompositionItem from './CompositionItem.vue'
+
+const props = defineProps(['compositionIds'])
 </script>
 
 <template>
@@ -19,16 +22,19 @@
     </div>
   </div>
   <div class="compositions">
-    
+    <CompositionItem
+      v-for="id in compositionIds"
+      :key="id" 
+      :compositionId="id" />
   </div>
 </template>
 
 <script>
-  export default {
-    mounted() {
-      let sortFilterScript = document.createElement('script')
-      sortFilterScript.setAttribute('src', './src/assets/sortfilter.js')
-      document.head.appendChild(sortFilterScript)
-    },
-  }
+export default {
+  mounted() {
+    let sortFilterScript = document.createElement('script')
+    sortFilterScript.setAttribute('src', './src/assets/sortfilter.js')
+    document.head.appendChild(sortFilterScript)
+  },
+}
 </script>
