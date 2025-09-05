@@ -101,7 +101,7 @@ h1::before {
 
 .controls .filter input + span {
   display: inline-block;
-  background: #999;
+  background: #aaa;
   border-radius: 4px;
   color: #fff;
   padding: 2px 8px;
@@ -114,6 +114,44 @@ h1::before {
   color: white;
 }
 
+.controls .refresh {
+  float: inline-end;
+}
+
+.controls .refresh button {
+  background-color: #0095ff;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  outline: none;
+  padding: 2px 8px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+.controls .refresh button:hover,
+.controls .refresh button:focus {
+  background-color: #07c;
+}
+
+.controls .refresh button:focus {
+  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
+}
+
+.controls .refresh button:active {
+  background-color: #0064bd;
+  box-shadow: none;
+}
+
+.controls .refresh button::before{
+  content: "↻ ";
+}
+
 /* ===== Compositions Grid ===== */
 .compositions {
   display: grid;
@@ -121,12 +159,6 @@ h1::before {
   gap: 1rem;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-@media screen and (max-width: 800px) {
-  .compositions {
-    display: inline;
-  }
 }
 
 /* ===== Composition Card ===== */
@@ -301,5 +333,11 @@ details th {
 
   .composition {
     padding: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .compositions {
+    display: inline;
   }
 }

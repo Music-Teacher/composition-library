@@ -51,7 +51,7 @@ export default {
   methods: {
     async fetchComposition() {
       try {
-        const response = await fetch('http://localhost:3000/composition/id/' + this.compositionId);
+        const response = await fetch('http://localhost:5556/composition/id/' + this.compositionId);
         if (!response.ok) {
           throw new Error('Failed to fetch composition IDs');
         }

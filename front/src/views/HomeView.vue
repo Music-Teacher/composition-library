@@ -25,7 +25,7 @@ export default {
   methods: {
     async fetchCompositionIds() {
       try {
-        const response = await fetch('http://localhost:3000/compositions/ids');
+        const response = await fetch('http://localhost:5556/compositions/ids');
         if (!response.ok) {
           throw new Error('Failed to fetch composition IDs');
         }
@@ -37,7 +37,7 @@ export default {
     },
     async fetchAboutInfo() {
       try {
-        const response = await fetch('http://localhost:3000/basicinfo');
+        const response = await fetch('http://localhost:5556/basicinfo');
         if (!response.ok) {
           throw new Error('Failed to fetch basic info');
         }

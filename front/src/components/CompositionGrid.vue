@@ -20,6 +20,9 @@ const props = defineProps(['compositionIds'])
       Only show: <label><input id="showFinished" type="checkbox" /><span>Finished</span></label
       ><label><input id="showNotFinished" type="checkbox" /><span>In Progress</span></label>
     </div>
+    <div class="refresh">
+      <button id="refreshButton" @click="refresh">Refresh</button>
+    </div>
   </div>
   <div class="compositions">
     <CompositionItem
@@ -32,9 +35,22 @@ const props = defineProps(['compositionIds'])
 <script>
 export default {
   mounted() {
-    let sortFilterScript = document.createElement('script')
-    sortFilterScript.setAttribute('src', './src/assets/sortfilter.js')
-    document.head.appendChild(sortFilterScript)
+    let sortFilterScript = document.createElement('script');
+    sortFilterScript.setAttribute('src', './src/assets/sortfilter.js');
+    document.head.appendChild(sortFilterScript);
   },
+  methods: {
+    async refresh() {
+      try {
+        const response = await fetch('http://localhost:5556/refresh');
+        if (!response.ok) {
+          throw new Error('Failed to fetch composition IDs');
+        }
+        const data = await response.json();
+      } catch (error) {
+        console.error('Error fetching composition IDs:', error);
+      }
+    },
+  }
 }
 </script>

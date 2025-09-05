@@ -401,14 +401,14 @@
       "lyrics": "I will follow you,\nI will follow you",
       "chords": "(barred) C Am F G",
       "extra_info": null,
-      "status": "Finished",
-      "rework": null,
+      "status": "In Progress",
+      "rework": "Solo sounds need to detach from background (electric guitar, melody when there is no electric guitar, voice)",
       "als_file_path": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project/Piano Guitare.als",
       "project_dir": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project",
       "root_folder": "/mnt/c/Users/obrun/Music/Compositions",
       "als_file_name": "Piano Guitare.als",
       "audio_file": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project/Piano Guitare.wav",
-      "last_activity": "2025-09-01 01:16"
+      "last_activity": "2025-09-05 03:47"
     },
     "24": {
       "name": "Piano Lofi.als",

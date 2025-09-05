@@ -229,16 +229,14 @@ class MusicLister:
         continue
       self.look_for_als(next_path)
 
-  def export_html(self, silent=False):
-    if not silent:
-      print(f"Exporting HTML library to: {self.output_html_file}")
+  def export_html(self):
+    print(f"Exporting HTML library to: {self.output_html_file}")
     file = open(self.output_html_file, 'w')
     file.write(self.__html__())
     file.close()
 
-  def export_json(self, silent=False):
-    if not silent:
-      print(f"Exporting JSON library to: {self.output_json_file}")
+  def export_json(self):
+    print(f"Exporting JSON library to: {self.output_json_file}")
     file = open(self.output_json_file, 'w')
     file.write(self.__json__(python=False))
     file.close()
@@ -422,10 +420,10 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
 
 
 # Main code
-def main_code(silent=False):
+def main_code():
   ml = MusicLister(COMPOSITIONS_FOLDER)
-  ml.export_html(silent)
-  ml.export_json(silent)
+  ml.export_html()
+  ml.export_json()
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
@@ -448,7 +446,7 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
     if command == "refresh":
       print("Scanning for compositions...")
-      main_code(silent=True)
+      main_code()
       next_refresh_time = time.time() + UPDATE_FREQUENCY
       command = None
 
