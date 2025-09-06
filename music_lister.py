@@ -138,11 +138,10 @@ class Composition:
     file_path = tag.p(f"File path: {str(tag.span(path_to_display))}", cls="als_file_path")
     activity_path_elements.append(file_path)
     #audio file details
-    if self.is_finished():
-      audio_text = "exported" if self.audio_file else "not exported"
-      audio_class = "audio_file" if self.audio_file else "audio_file not_exported"
-      audio_generated = tag.p(f"Sound file {audio_text}", cls=audio_class)
-      activity_path_elements.append(audio_generated)
+    audio_generated = tag.p(f"Sound file not exported", cls="audio_file not_exported")
+    if self.audio_file:
+      audio_generated = tag.p(f"<audio controls><source src='{Helpers.replace_wsl_disk_with_windows(self.audio_file)}' type='audio/wav'></audio>", cls="audio_file exported")
+    activity_path_elements.append(audio_generated)
     activity_path_div = tag.div(activity_path_elements, cls="activity_path")
     list_of_elements.append(activity_path_div)
 
@@ -391,7 +390,9 @@ class Helpers:
   
   @staticmethod
   def replace_wsl_disk_with_windows(path):
-    return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
+    if os.path.isfile(path):
+      return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
+    return None
 
   @staticmethod
   def place_html_newlines(text):

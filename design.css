@@ -124,12 +124,6 @@ h1::before {
   margin: 0 auto;
 }
 
-@media screen and (max-width: 800px) {
-  .compositions {
-    display:inline;
-  }
-}
-
 /* ===== Composition Card ===== */
 .composition {
   padding: 1rem;
@@ -189,12 +183,28 @@ h1::before {
   content: "🗀 ";
 }
 
-.audio_file::before {
+.audio_file.not_exported::before {
   content: "▷ ";
 }
 
 .audio_file.not_exported {
   font-weight: bold;
+}
+
+.audio_file audio {
+  vertical-align: middle;
+  width: 100%;
+  max-width: 250px;
+  margin-top: 0.3rem;
+}
+
+audio::-webkit-media-controls-panel {
+  background-color: light-dark(#ffffff, #222222);
+  padding: 0;
+}
+
+audio::-webkit-media-controls-enclosure {
+  border-radius: 5px;
 }
 
 /* ===== Status with Emoji ===== */
@@ -223,13 +233,13 @@ h1::before {
   margin-left: 5%;
   padding-left: 3%;
   display: block;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid light-dark(#ddd, #aaa);
   font-size: 0.9em;
 }
 
 .rework span:last-of-type {
   padding: 0 2%;
-  background: light-dark(#fafafa, #222222);
+  background: light-dark(#fafafa, #111);
 }
 
 .rework::before {
@@ -302,5 +312,11 @@ details th {
 
   .composition {
     padding: 0.8rem;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .compositions {
+    display: inline;
   }
 }
