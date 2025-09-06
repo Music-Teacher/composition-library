@@ -211,7 +211,7 @@ class MusicLister:
     assert os.path.isdir(root_folder)
     self.root_folder = root_folder
     self.output_html_file = os.path.join(root_folder, "index.html")
-    self.output_json_file = os.path.abspath(os.path.join("database", "database.json"))
+    self.output_json_file = os.path.abspath(os.path.join("..", "database", "database.json"))
     self.look_for_als(root_folder)
   
   def look_for_als(self, path):

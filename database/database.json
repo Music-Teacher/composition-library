@@ -173,21 +173,21 @@
       "last_activity": "2024-03-24 21:37"
     },
     "10": {
-      "name": "Electronic Music or LoFi.als",
-      "artist": null,
+      "name": "Charge",
+      "artist": "L'Esprit Bleu",
       "album": null,
       "ep": null,
       "lyrics": null,
-      "chords": null,
+      "chords": "Key of E\nII IV VI I\nF#m A C#m E",
       "extra_info": null,
-      "status": "In Progress",
+      "status": "Finished",
       "rework": null,
       "als_file_path": "/mnt/c/Users/obrun/Music/Compositions/Electronic Music or LoFi Project (TURN INTO SONG)/Electronic Music or LoFi.als",
       "project_dir": "/mnt/c/Users/obrun/Music/Compositions/Electronic Music or LoFi Project (TURN INTO SONG)",
       "root_folder": "/mnt/c/Users/obrun/Music/Compositions",
       "als_file_name": "Electronic Music or LoFi.als",
       "audio_file": "/mnt/c/Users/obrun/Music/Compositions/Electronic Music or LoFi Project (TURN INTO SONG)/Electronic Music or LoFi.wav",
-      "last_activity": "2025-02-20 23:04"
+      "last_activity": "2025-09-06 01:13"
     },
     "11": {
       "name": "EP 1 Piano 1.als",
@@ -402,13 +402,13 @@
       "chords": "(barred) C Am F G",
       "extra_info": null,
       "status": "In Progress",
-      "rework": "Solo sounds need to detach from background (electric guitar, melody when there is no electric guitar, voice)",
+      "rework": "Check with time if bass low end is too loud, also might need to do something with the voice",
       "als_file_path": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project/Piano Guitare.als",
       "project_dir": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project",
       "root_folder": "/mnt/c/Users/obrun/Music/Compositions",
       "als_file_name": "Piano Guitare.als",
       "audio_file": "/mnt/c/Users/obrun/Music/Compositions/Piano Guitare Project/Piano Guitare.wav",
-      "last_activity": "2025-09-05 03:47"
+      "last_activity": "2025-09-05 16:13"
     },
     "24": {
       "name": "Piano Lofi.als",

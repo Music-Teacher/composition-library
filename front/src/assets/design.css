@@ -3,12 +3,13 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  color-scheme: light dark;
 }
 
 body {
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
-  background: #fff; /* pure flat white */
-  color: #222;
+  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+  background: light-dark(#fff, #000);
+  color: light-dark(#222, #ddd);
   line-height: 1.6;
   padding: 1rem;
 }
@@ -19,7 +20,7 @@ h1 {
   margin-bottom: 1.5rem;
   font-size: 1.8rem;
   font-weight: 600;
-  color: #333;
+  color: light-dark(#333, #ccc);
   letter-spacing: -0.5px;
 }
 
@@ -34,12 +35,12 @@ h1::before {
   max-width: 800px;
   margin: 0 auto 0;
   font-size: 0.85rem;
-  color: #666;
+  color: light-dark(#666, #999);
 }
 
 .lister_details details {
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
+  border-top: 1px solid light-dark(#eee, #111);
+  border-bottom: 1px solid light-dark(#eee, #111);
   padding: 0.5rem 0;
 }
 
@@ -82,8 +83,8 @@ h1::before {
   max-width: 800px;
   margin: 0 auto 2rem;
   font-size: 0.85rem;
-  color: #666;
-  border-bottom: 1px solid #eee;
+  color: light-dark(#666, #999);
+  border-bottom: 1px solid light-dark(#eee, #111);
   padding: 0.5rem 0;
 }
 
@@ -101,17 +102,17 @@ h1::before {
 
 .controls .filter input + span {
   display: inline-block;
-  background: #aaa;
+  background: light-dark(#999, #666);
   border-radius: 4px;
-  color: #fff;
+  color: light-dark(#fff, #fff);
   padding: 2px 8px;
   cursor: pointer;
   margin-right: 2px;
 }
 
 .controls .filter input:checked + span {
-  background: #000;
-  color: white;
+  background: light-dark(#000, #fff);
+  color: light-dark(#fff, #000);
 }
 
 .controls .refresh {
@@ -164,16 +165,16 @@ h1::before {
 /* ===== Composition Card ===== */
 .composition {
   padding: 1rem;
-  border-bottom: 1px solid #eee; /* only divider */
+  border-bottom: 1px solid light-dark(#eee, #111); /* only divider */
   -webkit-transition: background-color 0.5s;
-  -moz-transition: background-color 0.5s;
-  -ms-transition: background-color 0.5s;
-  -o-transition: background-color 0.5s;
-  transition: background-color 0.5s;
+  -moz-transition:    background-color 0.5s;
+  -ms-transition:     background-color 0.5s;
+  -o-transition:      background-color 0.5s;
+  transition:         background-color 0.5s;
 }
 
 .composition:hover {
-  background-color: #f6f6f6;
+  background-color: light-dark(#f6f6f6, #0b0b0b);
 }
 
 .composition .songname {
@@ -234,8 +235,8 @@ h1::before {
   margin-bottom: 0.5rem;
 }
 
-.composition .status {
-  color: #d33;
+.composition.unfinished .status {
+  color: light-dark(#d33, rgb(231, 45, 45));
 }
 
 .composition .status::after {
@@ -243,7 +244,7 @@ h1::before {
 }
 
 .composition.finished .status {
-  color: #2ecc71;
+  color: light-dark(#2ecc71, #09a94c);
 }
 
 .rework_multiple_lines span:first-of-type::after {
@@ -260,7 +261,7 @@ h1::before {
 
 .rework span:last-of-type {
   padding: 0 2%;
-  background: #fafafa;
+  background: light-dark(#fafafa, #222222);
 }
 
 .rework::before {
@@ -270,13 +271,13 @@ h1::before {
 
 /* ===== Finished Composition Styling ===== */
 .composition.finished {
-  background: #fafffa;
+  background: light-dark(#fafffa, #001100);
   border-left: 3px solid #2ecc71;
   padding-left: 0.7rem;
 }
 
 .composition.finished:hover {
-  background-color: #ebffeb;
+  background-color: light-dark(#ebffeb, #002200);
 }
 
 /* ===== Collapsible Extra Info (click to open) ===== */
@@ -312,13 +313,13 @@ details th,
 details td {
   padding: 0.2rem 0.3rem;
   text-align: left;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid light-dark(#f0f0f0, #cccccc);
   vertical-align: top;
 }
 
 details th {
   font-weight: 600;
-  color: #444;
+  color: light-dark(#444, #999);
 }
 
 /* ===== Responsive ===== */
