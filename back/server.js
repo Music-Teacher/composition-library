@@ -15,7 +15,7 @@ PYTHON_BACKEND_URL = "localhost:5555"
 var fs = require('fs');
 var database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
 
-app.get('/refresh', (req, res) => {
+app.get('/refresh_database', (req, res) => {
   console.log("Looking to update database");
   request('http://' + PYTHON_BACKEND_URL + '/refresh', function (error, response, body) {
     if (error) {

@@ -1,5 +1,23 @@
 #!/bin/bash
 
+music_lister_kill() {
+  tput setaf 1
+  printf "\rSIGINT caught      "
+  tput sgr0
+  sleep 1
+
+  if [[ ! -z "$MUSIC_LISTER_ID" ]]; then
+      printf "\nStopping python backend (PID $MUSIC_LISTER_ID)... "
+      kill -SIGTERM $MUSIC_LISTER_ID
+      wait $MUSIC_LISTER_ID 2>/dev/null
+      printf "Done.\n"
+  fi
+  
+  printf "Exiting program.\n"
+  exit 0
+}
+trap 'music_lister_kill' SIGTERM SIGINT
+
 # Documentation if script misused
 usage () (
 program_name="$0"
@@ -8,10 +26,7 @@ if [ ! $# -eq 0 ]; then
 fi
 cat << EOF
 Usage: 
-  $program_name once|periodically
-  Options:
-    once: Run the program once
-    periodically: Run the program periodically in the background
+  $program_name
 EOF
 )
 
@@ -30,6 +45,13 @@ fi
 source venv/bin/activate
 pip install -r requirements.txt
 
-echo "Launching program $1..."
-python music_lister.py $1
+echo "Launching music_lister program..."
+python music_lister.py &
+MUSIC_LISTER_ID=$(echo $!)
+echo "Music lister started with PID $MUSIC_LISTER_ID."
 deactivate
+
+# Keep alive
+while /bin/true; do
+  sleep 2
+done

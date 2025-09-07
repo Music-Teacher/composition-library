@@ -30,13 +30,20 @@ other_commands() {
   printf "Exiting program.\n"
   exit 0
 }
-trap 'other_commands' SIGINT SIGTERM
+trap 'other_commands' SIGINT
 
 # Start python backend
 cd python-back
 mkdir -p logs
-./start_music_lister.sh periodically > logs/music_lister.log 2>&1 &
+echo "Checking dependencies..."
+if [[ ! -d "venv" ]]; then
+  python -m venv venv
+fi
+source venv/bin/activate
+pip install -r requirements.txt
+python music_lister.py > logs/music_lister.log 2>&1 &
 PYTHON_BACK_PID=$(echo $!)
+deactivate
 cd $HOME
 
 # Start backend

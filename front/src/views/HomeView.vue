@@ -6,7 +6,7 @@ import CompositionGrid from '../components/CompositionGrid.vue'
 <template>
   <main>
     <About :aboutInfo="aboutInfo" />
-    <CompositionGrid :compositionIds="compositionIds" />
+    <CompositionGrid />
   </main>
 </template>
 
@@ -14,7 +14,6 @@ import CompositionGrid from '../components/CompositionGrid.vue'
 export default {
   data() {
     return {
-      compositionIds: [], // State to store the composition IDs
       aboutInfo: [] // State to store the basic composition info
     };
   },
@@ -30,7 +29,6 @@ export default {
         }
         const data = await response.json();
         this.aboutInfo = data; // Assuming the API returns an array of IDs
-        this.aboutInfo["number_of_compositions"] = this.compositionIds.length;
       } catch (error) {
         console.error('Error fetching composition IDs:', error);
       }

@@ -1,7 +1,5 @@
 <script setup>
 import CompositionItem from './CompositionItem.vue'
-
-const props = defineProps(['compositionIds'])
 </script>
 
 <template>
@@ -34,18 +32,24 @@ const props = defineProps(['compositionIds'])
 
 <script>
 export default {
+  data() {
+    return {
+      compositionIds: [], // State to store the composition IDs
+    };
+  },
   mounted() {
     let sortFilterScript = document.createElement('script');
     sortFilterScript.setAttribute('src', './src/assets/sortfilter.js');
     document.head.appendChild(sortFilterScript);
   },
-  creayted() {
+  created() {
     this.fetchCompositionIds();
   },
   methods: {
     async refresh() {
+      // First refresh database
       try {
-        const response = await fetch('http://localhost:5556/refresh');
+        const response = await fetch('http://localhost:5556/refresh_database');
         if (!response.ok) {
           throw new Error('Failed to fetch composition IDs');
         }
@@ -53,6 +57,7 @@ export default {
       } catch (error) {
         console.error('Error fetching composition IDs:', error);
       }
+      // Then fetch new composition IDs
       this.fetchCompositionIds();
     },
     async fetchCompositionIds() {

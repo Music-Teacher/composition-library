@@ -175,6 +175,7 @@ class MusicLister:
     j = dict()
     j["root_folder"] = self.root_folder
     j["output_json_file"] = self.output_json_file
+    j["number_of_compositions"] = len(self.compositions)
     j["compositions"] = dict()
     id = 0
     for name in self.compositions:
@@ -275,12 +276,6 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
     # Store the command where the worker thread can see it
     self.server.command_queue.put((command, no_timeout_event, success_event))
 
-    # Respond to the client (you can customise the body if you want)
-    self.send_response(202)
-    self.send_header("Content-Type", "text/plain")
-    self.end_headers()
-    self.wfile.write(b"PROCESSING\n")
-
     no_timeout = no_timeout_event.wait(15) # Wait up to 15 seconds for the command to be processed
     success = success_event.is_set()
 
@@ -357,7 +352,9 @@ if __name__ == "__main__":
   main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
   print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.")
   main_thread.start()
-  threading.Thread(target=httpd.serve_forever, daemon=True).start()
+  
+  server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+  server_thread.start()
 
   try:
     # Main thread can stay idle or do other work.
@@ -367,4 +364,7 @@ if __name__ == "__main__":
     print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…")
     stop_flag.set()
     main_thread.join()
+    httpd.server_close()
+    httpd.shutdown()
+    server_thread.join()
   print("Program music_lister stopped.")
