@@ -1,7 +1,6 @@
 //
 // Sorting
 //
-
 const list = document.querySelector('.compositions')
 const select = document.getElementById('sortSelect')
 

@@ -34,6 +34,7 @@ trap 'other_commands' SIGINT
 
 # Start python backend
 cd python-back
+echo -e "\[42m## Starting Python backend"
 mkdir -p logs
 echo "Checking dependencies..."
 if [[ ! -d "venv" ]]; then

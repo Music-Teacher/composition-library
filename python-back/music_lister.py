@@ -53,6 +53,15 @@ class Composition:
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
     self.audio_file = Helpers.get_audio_file_related_to_als(self.als_file_path)
+    self.name = None
+    self.artist = None
+    self.album = None
+    self.ep = None
+    self.lyrics = None
+    self.chords = None
+    self.extra_info = None
+    self.status = None
+    self.rework = None
     self.gather_composition_information()
 
   def gather_composition_information(self):
@@ -79,6 +88,11 @@ class Composition:
   
   def is_finished(self):
     return self.status == "Finished"
+
+  def getShortenedFilePath(self):
+    if self.root_folder:
+      return os.path.relpath(self.als_file_path, self.root_folder)
+    return self.als_file_path
 
   def __str__(self):
     return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
@@ -133,10 +147,10 @@ class MusicLister:
   It will find them in the root_folder path."""
 
   root_folder = None
-  compositions = dict()
 
   def __init__(self, root_folder):
     assert os.path.isdir(root_folder)
+    self.compositions = dict()
     self.root_folder = root_folder
     self.output_json_file = os.path.abspath(os.path.join("..", "database", "database.json"))
     self.look_for_als(root_folder)
@@ -157,7 +171,7 @@ class MusicLister:
       self.look_for_als(next_path)
 
   def export_json(self):
-    print(f"Exporting JSON library to: {self.output_json_file}")
+    print(f"Exporting JSON library to: {self.output_json_file}", flush=True)
     file = open(self.output_json_file, 'w')
     file.write(self.__json__(python=False))
     file.close()
@@ -179,8 +193,10 @@ class MusicLister:
     j["compositions"] = dict()
     id = 0
     for name in self.compositions:
-      j["compositions"][id] = self.compositions[name].__json__()
+      dict_id = f"{id}-{abs(hash(self.compositions[name].als_file_path))}"
+      j["compositions"][dict_id] = self.compositions[name].__json__()
       id = id + 1
+      print(name, flush=True)
     
     if python:
       return j
@@ -312,18 +328,18 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
       command, no_timeout_event, success_event = None, None, None
 
     if command:
-      print(f"Received data on HTTP server: '{command}'")
+      print(f"Received data on HTTP server: '{command}'", flush=True)
 
     try:
       command_valid = command in ["refresh"]
       auto_refresh = command is None and time.time() >= next_refresh_time
 
       if command_valid or auto_refresh:
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), flush=True)
 
         data = "SUCCESS"
         if command == "refresh" or auto_refresh:
-          print("Scanning for compositions...")
+          print("Scanning for compositions...", flush=True)
           main_code()
           next_refresh_time = time.time() + UPDATE_FREQUENCY
 
@@ -331,7 +347,7 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
           success_event.set()
 
     except Exception as e:
-      print(f"Error during main code execution: {e}")
+      print(f"Error during main code execution: {e}", flush=True)
     finally:
       if no_timeout_event:
         no_timeout_event.set()
@@ -339,7 +355,7 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
   httpd.server_close()
 
 if __name__ == "__main__":
-  print("Starting music_lister...")
+  print("Starting music_lister...", flush=True)
   # Create the HTTP server (no threading – we’ll drive it manually)
   httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
   httpd.allow_reuse_address = True
@@ -350,7 +366,7 @@ if __name__ == "__main__":
 
   stop_flag = threading.Event()    
   main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
-  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.")
+  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.", flush=True)
   main_thread.start()
   
   server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
@@ -361,10 +377,10 @@ if __name__ == "__main__":
     while True:
       time.sleep(1)
   except KeyboardInterrupt:
-    print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…")
+    print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…", flush=True)
     stop_flag.set()
     main_thread.join()
     httpd.server_close()
     httpd.shutdown()
-    server_thread.join()
-  print("Program music_lister stopped.")
+    server_thread.join
+  print("Program music_lister stopped.", flush=True)

@@ -10,6 +10,7 @@ const props = defineProps(['compositionId'])
     :data-title="composition['name']"
     :data-album="composition['album']"
     :data-artist="composition['artist']"
+    :data-id="compositionId"
   >
     <h2 class="songname">{{ composition["name"] }}</h2>
     <h3 class="artist">Artist: {{ composition["artist"] }}</h3>
@@ -45,7 +46,7 @@ export default {
       composition: [] // State to store the composition IDs
     };
   },
-  created() {
+  mounted() {
     this.fetchComposition();
   },
   methods: {
@@ -56,9 +57,20 @@ export default {
           throw new Error('Failed to fetch composition IDs');
         }
         const data = await response.json();
-        this.composition = data; // Assuming the API returns an array of IDs
+        this.$nextTick(() => {
+          console.log('Fetched composition data for ID', this.compositionId, data);
+          this.composition = data; // Assuming the API returns an array of IDs
+        });
       } catch (error) {
         console.error('Error fetching composition IDs:', error);
+      }
+    }
+  },
+  watch: {
+    compositionId(newId, oldId) {
+      console.log(`compositionId changed from ${oldId} to ${newId}`);
+      if (newId !== oldId) {
+        this.fetchComposition();
       }
     }
   }

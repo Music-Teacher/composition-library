@@ -8,13 +8,18 @@ const app = express()
 app.use(cors())
 const port = 5556
 
-// Configure music_lister python program
+// Configure music_lister access
 PYTHON_BACKEND_URL = "localhost:5555"
 
-// Read database file
+// Initialise database file
 var fs = require('fs');
-var database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
+var database;
+const read_database = () => {
+  database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
+};
+read_database();
 
+// Configure routes
 app.get('/refresh_database', (req, res) => {
   console.log("Looking to update database");
   request('http://' + PYTHON_BACKEND_URL + '/refresh', function (error, response, body) {
@@ -29,6 +34,7 @@ app.get('/refresh_database', (req, res) => {
       return;
     }
     res.send(response);
+    read_database();
   });
 })
 
