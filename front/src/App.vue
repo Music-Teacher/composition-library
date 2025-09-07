@@ -8,10 +8,10 @@ import Header from './components/Header.vue'
   <header>
     <div class="wrapper">
       <Header />
-      <nav>
+      <!-- <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/about">About</RouterLink>
-      </nav>
+      </nav> -->
     </div>
   </header>
   <RouterView />

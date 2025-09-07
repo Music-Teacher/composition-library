@@ -20,14 +20,6 @@ if [[ "${BASH_SOURCE[0]}" != "${0}" ]];then
   echo "Script must be executed, not sourced."
   usage ${BASH_SOURCE[0]}
   return
-elif [ $# -eq 0 ];then
-  echo "Script is missing parameters."
-  usage
-  exit 1
-elif [[ $1 != "once" ]] && [[ $1 != "periodically" ]];then
-  echo "Script has wrong parameter '$1'."
-  usage
-  exit 2
 fi
 
 # Start program

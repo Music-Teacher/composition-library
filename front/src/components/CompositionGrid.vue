@@ -39,6 +39,9 @@ export default {
     sortFilterScript.setAttribute('src', './src/assets/sortfilter.js');
     document.head.appendChild(sortFilterScript);
   },
+  creayted() {
+    this.fetchCompositionIds();
+  },
   methods: {
     async refresh() {
       try {
@@ -47,6 +50,19 @@ export default {
           throw new Error('Failed to fetch composition IDs');
         }
         const data = await response.json();
+      } catch (error) {
+        console.error('Error fetching composition IDs:', error);
+      }
+      this.fetchCompositionIds();
+    },
+    async fetchCompositionIds() {
+      try {
+        const response = await fetch('http://localhost:5556/compositions/ids');
+        if (!response.ok) {
+          throw new Error('Failed to fetch composition IDs');
+        }
+        const data = await response.json();
+        this.compositionIds = data; // Assuming the API returns an array of IDs
       } catch (error) {
         console.error('Error fetching composition IDs:', error);
       }

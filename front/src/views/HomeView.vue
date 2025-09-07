@@ -19,22 +19,9 @@ export default {
     };
   },
   created() {
-    this.fetchCompositionIds();
     this.fetchAboutInfo();
   },
   methods: {
-    async fetchCompositionIds() {
-      try {
-        const response = await fetch('http://localhost:5556/compositions/ids');
-        if (!response.ok) {
-          throw new Error('Failed to fetch composition IDs');
-        }
-        const data = await response.json();
-        this.compositionIds = data; // Assuming the API returns an array of IDs
-      } catch (error) {
-        console.error('Error fetching composition IDs:', error);
-      }
-    },
     async fetchAboutInfo() {
       try {
         const response = await fetch('http://localhost:5556/basicinfo');

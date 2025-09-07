@@ -6,8 +6,8 @@ import datetime
 import time
 import json
 import socketserver
-import select
 import http.server
+import queue
 
 # USER PARAMETERS
 # Set the folder to search
@@ -20,7 +20,7 @@ DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
 JS_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "sortfilter.js")
 
 # Timeout and update frequency
-UPDATE_FREQUENCY = 30 # 20 seconds
+UPDATE_FREQUENCY = 30
 SOCKET_HOST = "localhost"
 SOCKET_PORT = 5555
 
@@ -267,14 +267,38 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
   def do_GET(self):
     # Strip leading '/' and keep the raw command string
     command = self.path.lstrip('/')
+
+    # Create event to sync between backend and HTTP thread
+    no_timeout_event = threading.Event()
+    success_event = threading.Event()
+
     # Store the command where the worker thread can see it
-    self.server.last_command = command
+    self.server.command_queue.put((command, no_timeout_event, success_event))
 
     # Respond to the client (you can customise the body if you want)
-    self.send_response(200)
+    self.send_response(202)
     self.send_header("Content-Type", "text/plain")
     self.end_headers()
-    self.wfile.write(b"OK\n")
+    self.wfile.write(b"PROCESSING\n")
+
+    no_timeout = no_timeout_event.wait(15) # Wait up to 15 seconds for the command to be processed
+    success = success_event.is_set()
+
+    if no_timeout and success:
+      self.send_response(200)
+      self.send_header("Content-Type", "text/plain")
+      self.end_headers()
+      self.wfile.write(b"OK\n")
+    elif no_timeout and not success:
+      self.send_response(400)
+      self.send_header("Content-Type", "text/plain")
+      self.end_headers()
+      self.wfile.write(b"FAILED\n")
+    else:
+      self.send_response(500)
+      self.send_header("Content-Type", "text/plain")
+      self.end_headers()
+      self.wfile.write(b"REQUEST TIMEOUT\n")
 
 
 # Main code
@@ -284,62 +308,63 @@ def main_code():
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
-  command = None
   next_refresh_time = time.time() # To start, right now
 
   while not stop_event.is_set():
+    try:
+      command, no_timeout_event, success_event = httpd.command_queue.get(timeout=1)
+    except queue.Empty:
+      command, no_timeout_event, success_event = None, None, None
 
-    # Wait for update frequency or any socket activity
-    scan_timeout = max(1, next_refresh_time - time.time())
-    readable, _, _ = select.select([httpd.socket], [], [], scan_timeout)
-
-    if readable:
-      httpd.handle_request()
-      command = httpd.last_command
+    if command:
       print(f"Received data on HTTP server: '{command}'")
-      httpd.last_command = None
-    elif time.time() >= next_refresh_time:
-      command = "refresh"
 
-    if command == "refresh":
-      print("Scanning for compositions...")
-      main_code()
-      next_refresh_time = time.time() + UPDATE_FREQUENCY
-      command = None
+    try:
+      command_valid = command in ["refresh"]
+      auto_refresh = command is None and time.time() >= next_refresh_time
+
+      if command_valid or auto_refresh:
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+        data = "SUCCESS"
+        if command == "refresh" or auto_refresh:
+          print("Scanning for compositions...")
+          main_code()
+          next_refresh_time = time.time() + UPDATE_FREQUENCY
+
+        if success_event:
+          success_event.set()
+
+    except Exception as e:
+      print(f"Error during main code execution: {e}")
+    finally:
+      if no_timeout_event:
+        no_timeout_event.set()
 
   httpd.server_close()
 
 if __name__ == "__main__":
-  if not (len(sys.argv) >= 1 and sys.argv[1] in ['once', 'periodically']):
-    print("Usage:")
-    print("  python music_lister.py once|periodically")
-    print("  Options:")
-    print("    once: Run the program once")
-    print("    periodically: Run the program periodically in the background")
-    sys.exit(2)
-
   print("Starting music_lister...")
-  if sys.argv[1] == "once":
-    main_code()
-  elif sys.argv[1] == "periodically":
-    # Create the HTTP server (no threading – we’ll drive it manually)
-    httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
-    httpd.allow_reuse_address = True
-    httpd.server_bind()
-    httpd.server_activate()
-    httpd.last_command = None 
+  # Create the HTTP server (no threading – we’ll drive it manually)
+  httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
+  httpd.allow_reuse_address = True
+  httpd.server_bind()
+  httpd.server_activate()
+  httpd.last_command = None
+  httpd.command_queue = queue.Queue()
 
-    stop_flag = threading.Event()    
-    main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
-    print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.")
-    main_thread.start()
+  stop_flag = threading.Event()    
+  main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
+  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.")
+  main_thread.start()
+  threading.Thread(target=httpd.serve_forever, daemon=True).start()
 
-    try:
-      # Main thread can stay idle or do other work.
-      while True:
-        time.sleep(1)
-    except KeyboardInterrupt:
-      print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…")
-      stop_flag.set()
-      main_thread.join()
-    print("Program music_lister stopped.")
+  try:
+    # Main thread can stay idle or do other work.
+    while True:
+      time.sleep(1)
+  except KeyboardInterrupt:
+    print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…")
+    stop_flag.set()
+    main_thread.join()
+  print("Program music_lister stopped.")
