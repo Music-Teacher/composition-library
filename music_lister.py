@@ -4,10 +4,6 @@ import sys
 import threading
 import datetime
 import time
-import json
-import socketserver
-import select
-import http.server
 from html5builder import HTML5Builder, HTML5Element
 
 # USER PARAMETERS
@@ -21,7 +17,7 @@ DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
 JS_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "sortfilter.js")
 
 # Timeout and update frequency
-UPDATE_FREQUENCY = 30 # 20 seconds
+UPDATE_FREQUENCY = 20
 SOCKET_HOST = "localhost"
 SOCKET_PORT = 5555
 
@@ -171,31 +167,6 @@ class Composition:
                      'data-artist': self.artist or ''})
 
     return str(total_div)
-  
-  def __json__(self, python=True):
-    j = dict()
-    
-    j["name"] = self.name
-    j["artist"] = self.artist
-    j["album"] = self.album
-    j["ep"] = self.ep
-    j["lyrics"] = self.lyrics
-    j["chords"] = self.chords
-    j["extra_info"] = self.extra_info
-    j["status"] = self.status
-    j["rework"] = self.rework
-
-    j["als_file_path"] = self.als_file_path
-    j["project_dir"] = self.project_dir
-    j["root_folder"] = self.root_folder
-    j["als_file_name"] = self.als_file_name
-    j["audio_file"] = self.audio_file
-    j["last_activity"] = self.last_activity
-
-    if python:
-      return j
-    else:
-      return json.dumps(j, indent=2)
 
 
 class MusicLister:
@@ -210,7 +181,6 @@ class MusicLister:
     assert os.path.isdir(root_folder)
     self.root_folder = root_folder
     self.output_html_file = os.path.join(root_folder, "index.html")
-    self.output_json_file = os.path.abspath(os.path.join("database", "database.json"))
     self.look_for_als(root_folder)
   
   def look_for_als(self, path):
@@ -233,13 +203,6 @@ class MusicLister:
       print(f"Exporting HTML library to: {self.output_html_file}")
     file = open(self.output_html_file, 'w')
     file.write(self.__html__())
-    file.close()
-
-  def export_json(self, silent=False):
-    if not silent:
-      print(f"Exporting JSON library to: {self.output_json_file}")
-    file = open(self.output_json_file, 'w')
-    file.write(self.__json__(python=False))
     file.close()
   
   def __str__(self):
@@ -302,21 +265,6 @@ class MusicLister:
 
     doc = tag.html([head, body], lang='html')
     return str(tag.doctype + str(doc))
-  
-  def __json__(self, python=True):
-    j = dict()
-    j["root_folder"] = self.root_folder
-    j["output_json_file"] = self.output_json_file
-    j["compositions"] = dict()
-    id = 0
-    for name in self.compositions:
-      j["compositions"][id] = self.compositions[name].__json__()
-      id = id + 1
-    
-    if python:
-      return j
-    else:
-      return json.dumps(j, indent=2)
 
 
 class Helpers:
@@ -390,7 +338,7 @@ class Helpers:
   
   @staticmethod
   def replace_wsl_disk_with_windows(path):
-    if os.path.isfile(path):
+    if os.path.isfile(path) or os.path.isdir(path):
       return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
     return None
 
@@ -406,54 +354,16 @@ class Helpers:
     return return_dict
 
 
-class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
-  """Handles a single GET request."""
-
-  def do_GET(self):
-    # Strip leading '/' and keep the raw command string
-    command = self.path.lstrip('/')
-    # Store the command where the worker thread can see it
-    self.server.last_command = command
-
-    # Respond to the client (you can customise the body if you want)
-    self.send_response(200)
-    self.send_header("Content-Type", "text/plain")
-    self.end_headers()
-    self.wfile.write(b"OK\n")
-
-
 # Main code
 def main_code(silent=False):
   ml = MusicLister(COMPOSITIONS_FOLDER)
   ml.export_html(silent)
-  ml.export_json(silent)
 
-def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
-
-  command = None
-  next_refresh_time = time.time() # To start, right now
-
+def main_thread(stop_event):
   while not stop_event.is_set():
-
-    # Wait for update frequency or any socket activity
-    scan_timeout = max(1, next_refresh_time - time.time())
-    readable, _, _ = select.select([httpd.socket], [], [], scan_timeout)
-
-    if readable:
-      httpd.handle_request()
-      command = httpd.last_command
-      print(f"Received data on HTTP server: '{command}'")
-      httpd.last_command = None
-    elif time.time() >= next_refresh_time:
-      command = "refresh"
-
-    if command == "refresh":
-      print("Scanning for compositions...")
-      main_code(silent=True)
-      next_refresh_time = time.time() + UPDATE_FREQUENCY
-      command = None
-
-  httpd.server_close()
+    print("Scanning for compositions...")
+    main_code(silent=True)
+    time.sleep(UPDATE_FREQUENCY)
 
 if __name__ == "__main__":
   if not (len(sys.argv) >= 1 and sys.argv[1] in ['once', 'periodically']):
@@ -468,18 +378,10 @@ if __name__ == "__main__":
   if sys.argv[1] == "once":
     main_code()
   elif sys.argv[1] == "periodically":
-    # Create the HTTP server (no threading – we’ll drive it manually)
-    httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
-    httpd.allow_reuse_address = True
-    httpd.server_bind()
-    httpd.server_activate()
-    httpd.last_command = None 
-
     stop_flag = threading.Event()    
-    main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
-    print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.")
+    main_thread = threading.Thread(target=main_thread, args=(stop_flag,))
+    print(f"Program running with update frequency of {UPDATE_FREQUENCY}s.")
     main_thread.start()
-
     try:
       # Main thread can stay idle or do other work.
       while True:
