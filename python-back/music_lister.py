@@ -8,7 +8,6 @@ import json
 import socketserver
 import select
 import http.server
-from html5builder import HTML5Builder, HTML5Element
 
 # USER PARAMETERS
 # Set the folder to search
@@ -103,76 +102,6 @@ class Composition:
     return_string += f" -> Audio file {audio_generated}"
     return return_string
 
-  def __html__(self):
-    tag = HTML5Builder()
-    elem = HTML5Element
-
-    list_of_elements = []
-
-    # Song properties
-    list_of_elements.append(tag.h2(self.name, cls="songname"))
-    list_of_elements.append(tag.h3(f"Artist: {self.artist}", cls="artist"))
-    if self.ep:
-      list_of_elements.append(tag.h3(f"EP: {self.ep}", cls="album"))
-    else:
-      list_of_elements.append(tag.h3(f"Album: {self.album}", cls="album"))
-
-    # Status
-    list_of_elements.append(tag.p(f"Status: {self.status}", cls="status"))
-    if not self.is_finished():
-      rework_transform = Helpers.place_html_newlines(self.rework)
-      rework_class = "rework"
-      if rework_transform["multiple_lines"]:
-        rework_class += " rework_multiple_lines"
-      list_of_elements.append(tag.p(f"{str(tag.span("Rework: "))}{str(tag.span(rework_transform["html"]))}", cls=rework_class))
-
-    # Last activity and path to project
-    activity_path_elements = []
-    #last activity
-    last_activity = tag.p(f"Last modified: {str(tag.span(self.last_activity))}", cls="last_activity")
-    activity_path_elements.append(last_activity)
-    #als project file path
-    path_to_display = self.als_file_path
-    if self.root_folder:
-      path_to_display = os.path.relpath(self.als_file_path,self.root_folder)
-    file_path = tag.p(f"File path: {str(tag.span(path_to_display))}", cls="als_file_path")
-    activity_path_elements.append(file_path)
-    #audio file details
-    if self.is_finished():
-      audio_text = "exported" if self.audio_file else "not exported"
-      audio_class = "audio_file" if self.audio_file else "audio_file not_exported"
-      audio_generated = tag.p(f"Sound file {audio_text}", cls=audio_class)
-      activity_path_elements.append(audio_generated)
-    activity_path_div = tag.div(activity_path_elements, cls="activity_path")
-    list_of_elements.append(activity_path_div)
-
-    # Extra details
-    table_rows = [tag.tr([tag.th("Lyrics"), tag.td(Helpers.place_html_newlines(self.lyrics)["html"])]),
-                  tag.tr([tag.th("Chords"), tag.td(Helpers.place_html_newlines(self.chords)["html"])])]
-    if self.extra_info:
-      table_row.append(tag.tr([tag.th("Extra"), tag.td(Helpers.place_html_newlines(self.extra_info)["html"])]))
-    summary = tag.summary("More info")
-    list_of_elements.append(tag.details([summary, tag.table(table_rows, border="0", cellpadding="5")]))
-    
-    # Assemble all elements
-    composition_div_classes = "composition"
-    data_status = ""
-    if Helpers.is_status_complete(self.status):
-      composition_div_classes += " finished"
-      data_status = "finished"
-    else:
-      composition_div_classes += " unfinished"
-      data_status = "unfinished"
-    total_div = elem('div', list_of_elements,
-                    {'class': composition_div_classes,
-                     'data-activity': self.last_activity,
-                     'data-status': data_status,
-                     'data-title': self.name,
-                     'data-album': self.album or self.ep or '',
-                     'data-artist': self.artist or ''})
-
-    return str(total_div)
-  
   def __json__(self, python=True):
     j = dict()
     
@@ -204,13 +133,11 @@ class MusicLister:
   It will find them in the root_folder path."""
 
   root_folder = None
-  output_html_file = None
   compositions = dict()
 
   def __init__(self, root_folder):
     assert os.path.isdir(root_folder)
     self.root_folder = root_folder
-    self.output_html_file = os.path.join(root_folder, "index.html")
     self.output_json_file = os.path.abspath(os.path.join("..", "database", "database.json"))
     self.look_for_als(root_folder)
   
@@ -229,12 +156,6 @@ class MusicLister:
         continue
       self.look_for_als(next_path)
 
-  def export_html(self):
-    print(f"Exporting HTML library to: {self.output_html_file}")
-    file = open(self.output_html_file, 'w')
-    file.write(self.__html__())
-    file.close()
-
   def export_json(self):
     print(f"Exporting JSON library to: {self.output_json_file}")
     file = open(self.output_json_file, 'w')
@@ -243,64 +164,12 @@ class MusicLister:
   
   def __str__(self):
     return_string = f"\n###################\nRoot folder: {self.root_folder}\n"
-    return_string += f"Output HTML file: {self.output_html_file}\n"
     return_string += f"Number of compositions: {len(self.compositions)}\n"
-    # return_string += "\n"
-    # for name in self.compositions:
-    #   return_string += f"{self.compositions[name]}"
+    return_string += "\n"
+    for name in self.compositions:
+      return_string += f"{self.compositions[name]}"
     return_string += f"###################"
     return return_string
-
-  def __html__(self):
-    tag = HTML5Builder()
-    elem = HTML5Element
-
-    title = tag.title(f"Music Lister - {os.path.basename(self.root_folder)}")
-    css = tag.link(href=Helpers.replace_wsl_disk_with_windows(DESIGN_FILE_PATH), rel="stylesheet")
-    js = tag.script('', src=Helpers.replace_wsl_disk_with_windows(JS_FILE_PATH), type="text/javascript")
-    meta = tag.meta(charset="UTF-8")
-    head = tag.head([title, css, meta])
-
-    main_title = tag.h1(title)
-
-    # Details of music lister
-    summary = tag.summary("About this list")
-    detail1 = tag.li(f"Root folder: {tag.span(Helpers.replace_wsl_disk_with_windows(self.root_folder), cls="file_path")}")
-    detail2 = tag.li(f"Output HTML file: {tag.span(Helpers.replace_wsl_disk_with_windows(self.output_html_file), cls="file_path")}")
-    detail3 = tag.li(f"Number of compositions: {len(self.compositions)}")
-    details_list = tag.ul([detail1, detail2, detail3])
-    details = tag.div(tag.details([summary, details_list]), cls="lister_details")
-
-    # Sort and filter options
-    #sort
-    # empty_sort = elem("option", ["---"], {'disabled':'', 'selected':''})
-    activity_sort = tag.option("Last activity", value="activity")
-    status_sort = tag.option("Status", value="status")
-    title_sort = tag.option("Title", value="title")
-    artist_sort = tag.option("Artist", value="artist")
-    album_sort = tag.option("Album", value="album")
-    sort_select = tag.select([activity_sort, status_sort, title_sort, artist_sort, album_sort], id="sortSelect")
-    label_for_sort = elem("label", "Sort by: ", {"for": "sortSelect"})
-    #filter
-    input_finished = tag.input('', id='showFinished', type='checkbox')
-    label_for_finished = elem("label", [input_finished, tag.span("Finished")], {})
-    input_notfinished = tag.input('', id='showNotFinished', type='checkbox')
-    label_for_notfinished = elem("label", [input_notfinished, tag.span("In Progress")], {})
-    #assemble controls
-    controls = tag.div([tag.div([label_for_sort, sort_select], cls="sort"),
-                        tag.div(["Only show: ", label_for_finished, label_for_notfinished], cls="filter")],
-                        cls="controls")
-
-    # Compositions
-    compositions = tag.div('', cls="compositions")
-    for name in self.compositions:
-      compositions.child.append(self.compositions[name].__html__())
-
-    # Assemble it all together
-    body = tag.body([main_title, details, controls, compositions, js])
-
-    doc = tag.html([head, body], lang='html')
-    return str(tag.doctype + str(doc))
   
   def __json__(self, python=True):
     j = dict()
@@ -391,17 +260,6 @@ class Helpers:
   def replace_wsl_disk_with_windows(path):
     return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
 
-  @staticmethod
-  def place_html_newlines(text):
-    tag = HTML5Builder
-    return_dict = {"html": text, "multiple_lines": False}
-    HTML_NEW_LINE = "<br/>"
-    if return_dict["html"]:
-      return_dict["html"] = return_dict["html"].strip().replace("\n", HTML_NEW_LINE)
-      if HTML_NEW_LINE in return_dict["html"]:
-        return_dict["multiple_lines"] = True
-    return return_dict
-
 
 class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
   """Handles a single GET request."""
@@ -422,7 +280,6 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
 # Main code
 def main_code():
   ml = MusicLister(COMPOSITIONS_FOLDER)
-  ml.export_html()
   ml.export_json()
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
