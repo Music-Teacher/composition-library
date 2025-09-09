@@ -129,11 +129,11 @@ class Composition:
     j["status"] = self.status
     j["rework"] = self.rework
 
-    j["als_file_path"] = self.als_file_path
-    j["project_dir"] = self.project_dir
-    j["root_folder"] = self.root_folder
+    j["als_file_path"] = Helpers.replace_wsl_disk_with_windows(self.als_file_path)
+    j["project_dir"] = Helpers.replace_wsl_disk_with_windows(self.project_dir)
+    j["root_folder"] = Helpers.replace_wsl_disk_with_windows(self.root_folder)
     j["als_file_name"] = self.als_file_name
-    j["audio_file"] = self.audio_file
+    j["audio_file"] = Helpers.replace_wsl_disk_with_windows(self.audio_file)
     j["last_activity"] = self.last_activity
 
     if python:
@@ -275,7 +275,9 @@ class Helpers:
   
   @staticmethod
   def replace_wsl_disk_with_windows(path):
-    return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
+    if path:
+      return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
+    return None
 
 
 class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):

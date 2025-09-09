@@ -50,6 +50,12 @@ app.get('/compositions/ids', (req, res) => {
   res.json(compositionIds); // Send the array as JSON
 })
 
+app.get('/compositions', (req, res) => {
+  console.log("Looking for all composition data");
+  const compositions = _.values(database.compositions); // Use lodash to get keys
+  res.json(compositions); // Send the array as JSON
+})
+
 app.get('/composition/id/:id', (req, res) => {
   console.log("Looking for composition id: " + req.params.id);
   const composition = database.compositions[''+req.params.id];

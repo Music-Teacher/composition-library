@@ -32,9 +32,11 @@ other_commands() {
 }
 trap 'other_commands' SIGINT
 
+log_step() { echo -e "\n\e[42m# $*\e[0m\n"; }
+
 # Start python backend
 cd python-back
-echo -e "\[42m## Starting Python backend"
+log_step "Starting Python Backend"
 mkdir -p logs
 echo "Checking dependencies..."
 if [[ ! -d "venv" ]]; then
@@ -49,6 +51,7 @@ cd $HOME
 
 # Start backend
 cd back
+log_step "Starting Express Backend"
 npm install
 mkdir -p logs
 node server.js > logs/express-backend.log 2>&1 &
@@ -57,6 +60,7 @@ cd $HOME
 
 # Start frontend
 cd front
+log_step "Starting Vue Frontend"
 npm install
 npm run dev
 FRONTEND_PID=$(echo $!)

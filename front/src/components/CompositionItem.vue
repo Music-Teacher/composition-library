@@ -1,25 +1,38 @@
 <script setup>
-const props = defineProps(['compositionId'])
+const props = defineProps([
+  'name',
+  'artist',
+  'album',
+  'ep',
+  'lyrics',
+  'chords',
+  'extra_info',
+  'status',
+  'rework',
+  'als_file_path',
+  'project_dir',
+  'root_folder',
+  'als_file_name',
+  'audio_file',
+  'last_activity'
+])
 </script>
 
 <template>
-  <div
-    :class="{ composition: true, finished: composition['status'] === 'Finished' }"
-    :data-activity="composition['last_activity']"
-    :data-status="composition['status']"
-    :data-title="composition['name']"
-    :data-album="composition['album']"
-    :data-artist="composition['artist']"
-    :data-id="compositionId"
-  >
-    <h2 class="songname">{{ composition["name"] }}</h2>
-    <h3 class="artist">Artist: {{ composition["artist"] }}</h3>
-    <h3 class="album">Album: {{ composition["album"] }}</h3>
-    <p class="status">Status: {{ composition["status"] }}</p>
+  <div :class="{ composition: true, finished: status === 'Finished' }">
+    <h2 class="songname">{{ name }}</h2>
+    <h3 class="artist">Artist: {{ artist }}</h3>
+    <h3 class="album">Album: {{ album }}</h3>
+    <p class="status">Status: {{ status }}</p>
     <div class="activity_path">
-      <p class="last_activity">Last modified: <span>{{ composition["last_activity"] }}</span></p>
-      <p class="als_file_path">File path: <span>{{ composition["als_file_path"] }}</span></p>
-      <p class="audio_file">Sound file exported</p>
+      <p class="last_activity">Last modified: <span>{{ last_activity }}</span></p>
+      <p class="als_file_path">File path: <span>{{ als_file_path }}</span></p>
+      <p class="audio_file">
+        <audio controls v-if="audio_file">
+          <source :src="audio_file" type="audio/wav" />
+        </audio>
+        <span v-else>Sound file exported</span>
+      </p>
     </div>
     <details>
       <summary>More info</summary>
@@ -27,11 +40,11 @@ const props = defineProps(['compositionId'])
         <tbody>
           <tr>
             <th>Lyrics</th>
-            <td>{{ composition["lyrics"] }}</td>
+            <td>{{ lyrics }}</td>
           </tr>
           <tr>
             <th>Chords</th>
-            <td>{{ composition["chords"] }}</td>
+            <td>{{ chords }}</td>
           </tr>
         </tbody>
       </table>
@@ -40,39 +53,5 @@ const props = defineProps(['compositionId'])
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      composition: [] // State to store the composition IDs
-    };
-  },
-  mounted() {
-    this.fetchComposition();
-  },
-  methods: {
-    async fetchComposition() {
-      try {
-        const response = await fetch('http://localhost:5556/composition/id/' + this.compositionId);
-        if (!response.ok) {
-          throw new Error('Failed to fetch composition IDs');
-        }
-        const data = await response.json();
-        this.$nextTick(() => {
-          console.log('Fetched composition data for ID', this.compositionId, data);
-          this.composition = data; // Assuming the API returns an array of IDs
-        });
-      } catch (error) {
-        console.error('Error fetching composition IDs:', error);
-      }
-    }
-  },
-  watch: {
-    compositionId(newId, oldId) {
-      console.log(`compositionId changed from ${oldId} to ${newId}`);
-      if (newId !== oldId) {
-        this.fetchComposition();
-      }
-    }
-  }
-}
+
 </script>
