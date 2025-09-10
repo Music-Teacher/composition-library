@@ -7,7 +7,7 @@
 }
 
 body {
-  font-family: "Inter", "Segoe UI", Roboto, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
   background: light-dark(#fff, #000);
   color: light-dark(#222, #ddd);
   line-height: 1.6;
@@ -28,6 +28,42 @@ h1::before {
   content: '🎵 ';
   font-size: 1.5em;
   vertical-align: middle;
+}
+
+button {
+  background-color: #0095ff;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  box-shadow: rgba(255, 255, 255, 0.4) 0 1px 0 0 inset;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  outline: none;
+  padding: 2px 8px;
+  text-align: center;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+button:hover:not(:disabled),
+button:focus:not(:disabled) {
+  background-color: #07c;
+}
+
+button:disabled {
+  background-color: #bbb;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+button:focus {
+  box-shadow: 0 0 0 4px rgba(0, 149, 255, 0.15);
+}
+
+button:active {
+  background-color: #0064bd;
+  box-shadow: none;
 }
 
 /* ===== Info Panel (Secondary, collapsible) ===== */
@@ -78,6 +114,24 @@ h1::before {
   font-style: italic;
 }
 
+.lister_details .root_folder::before {
+  content: '📁 ';
+}
+
+.lister_details .root_folder input {
+  padding: 0px 6px;
+  width: 50%;
+  margin-right: 0.3rem;
+}
+
+.lister_details .database_file::before {
+  content: '🛢️ ';
+}
+
+.lister_details .number_of_compositions::before {
+  content: '🎼 ';
+}
+
 /* ===== Sort and Filter Controls ===== */
 .controls {
   max-width: 800px;
@@ -90,6 +144,27 @@ h1::before {
 
 .controls div {
   display: inline;
+}
+
+.controls .sort select {
+  padding: 2px 8px;
+}
+
+.controls .sort input {
+  display: none;
+}
+
+.controls .sort input + span {
+  margin-left: 0.5rem;
+  vertical-align: middle;
+  padding: 2px;
+  border-radius: 4px;
+  background: light-dark(#eee, #333);
+}
+
+.controls .sort input:checked + span {
+  background: light-dark(#333, #eee);
+  color: light-dark(#eee, #333);
 }
 
 .controls .filter {
@@ -107,7 +182,7 @@ h1::before {
   color: light-dark(#fff, #fff);
   padding: 2px 8px;
   cursor: pointer;
-  margin-right: 2px;
+  margin-left: 2px;
 }
 
 .controls .filter input:checked + span {
@@ -119,44 +194,8 @@ h1::before {
   float: inline-end;
 }
 
-.controls .refresh button {
-  background-color: #0095ff;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  box-shadow: rgba(255, 255, 255, .4) 0 1px 0 0 inset;
-  color: #fff;
-  cursor: pointer;
-  display: inline-block;
-  outline: none;
-  padding: 2px 8px;
-  text-align: center;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: manipulation;
-}
-
 .controls .refresh button::before {
-  content: "↻ ";
-}
-
-.controls .refresh button:hover:not(:disabled),
-.controls .refresh button:focus:not(:disabled) {
-  background-color: #07c;
-}
-
-.controls .refresh button:disabled {
-  background-color: #bbb;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.controls .refresh button:focus {
-  box-shadow: 0 0 0 4px rgba(0, 149, 255, .15);
-}
-
-.controls .refresh button:active {
-  background-color: #0064bd;
-  box-shadow: none;
+  content: '↻ ';
 }
 
 /* ===== Compositions Grid ===== */
@@ -173,10 +212,10 @@ h1::before {
   padding: 1rem;
   border-bottom: 1px solid light-dark(#eee, #111); /* only divider */
   -webkit-transition: background-color 0.5s;
-  -moz-transition:    background-color 0.5s;
-  -ms-transition:     background-color 0.5s;
-  -o-transition:      background-color 0.5s;
-  transition:         background-color 0.5s;
+  -moz-transition: background-color 0.5s;
+  -ms-transition: background-color 0.5s;
+  -o-transition: background-color 0.5s;
+  transition: background-color 0.5s;
 }
 
 .composition:hover {
@@ -228,7 +267,7 @@ h1::before {
 }
 
 .audio_file.not_exported::before {
-  content: "▷ ";
+  content: '▷ ';
 }
 
 .audio_file.not_exported {

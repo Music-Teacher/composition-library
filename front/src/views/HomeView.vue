@@ -15,5 +15,4 @@ import CompositionGrid from '../components/CompositionGrid.vue'
   </main>
 </template>
 
-<script>
-</script>
+<script></script>

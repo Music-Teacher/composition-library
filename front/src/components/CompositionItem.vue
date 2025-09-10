@@ -1,5 +1,4 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
   <div :class="{ composition: true, finished: status === 'Finished' }">
@@ -8,11 +7,15 @@
     <h3 class="album">Album: {{ album }}</h3>
     <p class="status">Status: {{ status }}</p>
     <div class="activity_path">
-      <p class="last_activity">Last modified: <span>{{ last_activity }}</span></p>
-      <p class="als_file_path">File path: <span>{{ als_file_path }}</span></p>
+      <p class="last_activity">
+        Last modified: <span>{{ last_activity }}</span>
+      </p>
+      <p class="als_file_path">
+        File path: <span>{{ als_file_path }}</span>
+      </p>
       <p class="audio_file">
         <audio controls v-if="audio_file">
-          <source :src="audio_source" :type="'audio/'+audio_extension" />
+          <source :src="audio_source" :type="'audio/' + audio_extension" />
         </audio>
         <span v-else>Sound file exported</span>
       </p>
@@ -53,24 +56,24 @@ export default {
     'root_folder',
     'als_file_name',
     'audio_file',
-    'last_activity'
+    'last_activity',
   ],
   computed: {
     audio_source() {
-      return this.audio_file ? `http://localhost:5556/composition/${this.id}/audio` : null;
+      return this.audio_file ? `http://localhost:5556/composition/${this.id}/audio` : null
     },
     audio_extension() {
       if (this.audio_file) {
-        const parts = this.audio_file.split('.');
-        return parts.length > 1 ? parts[parts.length - 1] : null;
+        const parts = this.audio_file.split('.')
+        return parts.length > 1 ? parts[parts.length - 1] : null
       }
-      return null;
-    }
+      return null
+    },
   },
   // mounted() {
   //   if (this.audio_file) {
   //     this.importAudio();
-  //   } 
+  //   }
   // },
   // methods: {
   //   async importAudio() {

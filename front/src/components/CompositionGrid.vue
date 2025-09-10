@@ -14,6 +14,10 @@ import CompositionItem from './CompositionItem.vue'
         <option value="artist">Artist</option>
         <option value="album">Album</option>
       </select>
+      <label>
+        <input v-model="reverseSort" type="checkbox" />
+        <span>reverse</span>
+      </label>
     </div>
     <div class="filter">
       Only show:
@@ -27,7 +31,9 @@ import CompositionItem from './CompositionItem.vue'
       </label>
     </div>
     <div class="refresh">
-      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">Refresh</button>
+      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">
+        Refresh
+      </button>
     </div>
   </div>
   <div class="compositions">
@@ -49,7 +55,8 @@ import CompositionItem from './CompositionItem.vue'
       :root_folder="composition['root_folder']"
       :als_file_name="composition['als_file_name']"
       :audio_file="composition['audio_file']"
-      :last_activity="composition['last_activity']" />
+      :last_activity="composition['last_activity']"
+    />
   </div>
 </template>
 
@@ -58,68 +65,93 @@ export default {
   data() {
     return {
       pollingInterval: null,
-      sortBy: "",
+      sortBy: 'activity',
+      reverseSort: false,
       refreshing: false,
       onlyFinished: false,
       onlyInProgress: false,
-    };
+    }
   },
   computed: {
     sortedFilteredCompositions() {
-      console.log("Sort:", this.sortBy, "Filter Finished:", this.onlyFinished, "Filter In Progress:", this.onlyInProgress);
-      let outputCompositions = store.compositions.slice(); // Create a copy of the array
+      console.log(
+        'Sort:',
+        this.sortBy,
+        'Reverse:',
+        this.reverseSort,
+        'Filter Finished:',
+        this.onlyFinished,
+        'Filter In Progress:',
+        this.onlyInProgress,
+      )
+      let outputCompositions = store.compositions.slice() // Create a copy of the array
 
       // Filtering
       if (this.onlyFinished) {
-        outputCompositions = outputCompositions.filter(c => c.status === 'Finished');
+        outputCompositions = outputCompositions.filter((c) => c.status === 'Finished')
       } else if (this.onlyInProgress) {
-        outputCompositions = outputCompositions.filter(c => c.status !== 'Finished');
+        outputCompositions = outputCompositions.filter((c) => c.status !== 'Finished')
       }
 
       // Sorting
       outputCompositions = outputCompositions.sort((a, b) => {
+        let returnValue = 0
         if (this.sortBy === 'activity') {
-          return new Date(b.last_activity) - new Date(a.last_activity);
+          returnValue = new Date(b.last_activity) - new Date(a.last_activity)
         } else if (this.sortBy === 'status') {
-          if (a.status === b.status) return 0;
-          if (a.status === 'Finished') return -1;
-          return 1;
+          if (a.status === b.status) returnValue = 0
+          else if (a.status === 'Finished') returnValue = -1
+          else returnValue = 1
         } else if (this.sortBy === 'title') {
-          return a.name.localeCompare(b.name);
+          returnValue = a.name.localeCompare(b.name)
         } else if (this.sortBy === 'artist') {
-          return a.artist.localeCompare(b.artist);
+          returnValue = a.artist.localeCompare(b.artist)
         } else if (this.sortBy === 'album') {
-          return a.album.localeCompare(b.album);
+          returnValue = a.album.localeCompare(b.album)
         }
-        return 0; // No sorting
-      });
-      return outputCompositions;
+        if (this.reverseSort == true) {
+          return returnValue * -1
+        }
+        return returnValue
+      })
+      return outputCompositions
     },
   },
   async mounted() {
-    await store.fetchCompositions();
-    await store.refreshDatabase();
-    await store.fetchCompositions();
+    await store.fetchCompositions()
+    await store.refreshDatabase()
+    await store.fetchCompositions()
   },
   created() {
-    this.sortBy = 'activity';
+    this.sortBy = 'activity'
+  },
+  beforeDestroy() {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval)
+    }
+  },
+  beforeCreate() {
+    this.pollingInterval = setInterval(async () => {
+      await store.refreshDatabase()
+      await store.fetchCompositions()
+    }, 30000) // 30 seconds
   },
   methods: {
     async syncCompositions() {
-      await store.refreshDatabase();
-      await store.fetchCompositions();
+      await store.refreshDatabase()
+      await store.fetchCompositions()
     },
     sortCompositions() {
-      this.$forceUpdate();
+      this.$forceUpdate()
     },
     filterFinished() {
-      this.onlyInProgress = false;
-      this.$forceUpdate();
+      this.onlyInProgress = false
+      this.$forceUpdate()
     },
     filterInProgress() {
-      this.onlyFinished = false;
-      this.$forceUpdate();
+      this.onlyFinished = false
+      this.$forceUpdate()
     },
-  }
+  },
 }
 </script>
