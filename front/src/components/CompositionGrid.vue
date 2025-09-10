@@ -33,6 +33,7 @@ import CompositionItem from './CompositionItem.vue'
   <div class="compositions">
     <CompositionItem
       v-for="composition in sortedFilteredCompositions"
+      :id="composition['id']"
       :key="composition['als_file_path']"
       :name="composition['name']"
       :artist="composition['artist']"
@@ -66,30 +67,33 @@ export default {
   },
   computed: {
     sortedFilteredCompositions() {
-      // console.log("Sorting by:", this.sortBy);
-      // // This can be expanded to return sorted IDs based on selected criteria
+      console.log("Sort:", this.sortBy, "Filter Finished:", this.onlyFinished, "Filter In Progress:", this.onlyInProgress);
       let outputCompositions = this.compositions.slice(); // Create a copy of the array
-      // if (this.sortBy === 'activity') {
-      //   // Sort by last activity (assuming compositionIds have a lastActivity property)
-      //   sortedCompositionIds = sortedCompositionIds.sort((a,b) => new Date(b.lastActivity) - new Date(a.lastActivity));
-      // } else if (this.sortBy === 'status') {
-      //   sortedCompositionIds = sortedCompositionIds.sort((a,b) => {
-      //     console.log("Comparing status:", a, b);
-      //     if (a.status === b.status) return 0;
-      //     if (a.status === 'Finished') return 1;
-      //     return -1;
-      //   });
-      // } else if (this.sortBy === 'title') {
-      //   // Sort by title (assuming compositionIds have a title property)
-      //   sortedCompositionIds = sortedCompositionIds.sort((a,b) => a.title.localeCompare(b.title));
-      // } else if (this.sortBy === 'artist') {
-      //   // Sort by artist (assuming compositionIds have an artist property)
-      //   sortedCompositionIds = sortedCompositionIds.sort((a,b) => a.artist.localeCompare(b.artist));
-      // } else if (this.sortBy === 'album') {
-      //   // Sort by album (assuming compositionIds have an album property)
-      //   sortedCompositionIds = sortedCompositionIds.sort((a,b) => a.album.localeCompare(b.album));
-      // }
-      // console.log("Sorted IDs:", sortedCompositionIds);
+
+      // Filtering
+      if (this.onlyFinished) {
+        outputCompositions = outputCompositions.filter(c => c.status === 'Finished');
+      } else if (this.onlyInProgress) {
+        outputCompositions = outputCompositions.filter(c => c.status !== 'Finished');
+      }
+
+      // Sorting
+      outputCompositions = outputCompositions.sort((a, b) => {
+        if (this.sortBy === 'activity') {
+          return new Date(b.last_activity) - new Date(a.last_activity);
+        } else if (this.sortBy === 'status') {
+          if (a.status === b.status) return 0;
+          if (a.status === 'Finished') return -1;
+          return 1;
+        } else if (this.sortBy === 'title') {
+          return a.name.localeCompare(b.name);
+        } else if (this.sortBy === 'artist') {
+          return a.artist.localeCompare(b.artist);
+        } else if (this.sortBy === 'album') {
+          return a.album.localeCompare(b.album);
+        }
+        return 0; // No sorting
+      });
       return outputCompositions;
     },
   },
@@ -104,9 +108,11 @@ export default {
       this.$forceUpdate();
     },
     filterFinished() {
+      this.onlyInProgress = false;
       this.$forceUpdate();
     },
     filterInProgress() {
+      this.onlyFinished = false;
       this.$forceUpdate();
     },
     async refresh_database() {

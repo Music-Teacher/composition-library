@@ -190,11 +190,13 @@ class MusicLister:
     j["root_folder"] = self.root_folder
     j["output_json_file"] = self.output_json_file
     j["number_of_compositions"] = len(self.compositions)
-    j["compositions"] = dict()
+    j["compositions"] = []
     id = 0
     for name in self.compositions:
       dict_id = f"{id}-{abs(hash(self.compositions[name].als_file_path))}"
-      j["compositions"][dict_id] = self.compositions[name].__json__()
+      composition_dict = self.compositions[name].__json__()
+      composition_dict["id"] = dict_id
+      j["compositions"].append(composition_dict)
       id = id + 1
       print(name, flush=True)
     
