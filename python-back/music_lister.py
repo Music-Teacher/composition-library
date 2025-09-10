@@ -8,9 +8,12 @@ import json
 import socketserver
 import http.server
 import queue
+import urllib.parse
 
-# USER PARAMETERS
-# Set the folder to search
+# DEFAULT GLOBAL PARAMETERS
+# Database export file
+DATABASE_FILE="../database/database.json"
+# Folder to search into for compositions
 COMPOSITIONS_FOLDER="/mnt/c/Users/obrun/Music/Compositions"
 #####
 
@@ -19,8 +22,7 @@ CURRENT_SCRIPT_PATH=os.path.dirname(os.path.realpath(__file__))
 DESIGN_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "design.css")
 JS_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "sortfilter.js")
 
-# Timeout and update frequency
-UPDATE_FREQUENCY = 30
+# TCP server parameters
 SOCKET_HOST = "localhost"
 SOCKET_PORT = 5555
 
@@ -129,11 +131,11 @@ class Composition:
     j["status"] = self.status
     j["rework"] = self.rework
 
-    j["als_file_path"] = Helpers.replace_wsl_disk_with_windows(self.als_file_path)
-    j["project_dir"] = Helpers.replace_wsl_disk_with_windows(self.project_dir)
-    j["root_folder"] = Helpers.replace_wsl_disk_with_windows(self.root_folder)
+    j["als_file_path"] = self.als_file_path
+    j["project_dir"] = self.project_dir
+    j["root_folder"] = self.root_folder
     j["als_file_name"] = self.als_file_name
-    j["audio_file"] = Helpers.replace_wsl_disk_with_windows(self.audio_file)
+    j["audio_file"] = self.audio_file
     j["last_activity"] = self.last_activity
 
     if python:
@@ -148,11 +150,11 @@ class MusicLister:
 
   root_folder = None
 
-  def __init__(self, root_folder):
+  def __init__(self, root_folder, output_json_file):
     assert os.path.isdir(root_folder)
     self.compositions = dict()
     self.root_folder = root_folder
-    self.output_json_file = os.path.abspath(os.path.join("..", "database", "database.json"))
+    self.output_json_file = os.path.abspath(output_json_file)
     self.look_for_als(root_folder)
   
   def look_for_als(self, path):
@@ -198,7 +200,6 @@ class MusicLister:
       composition_dict["id"] = dict_id
       j["compositions"].append(composition_dict)
       id = id + 1
-      print(name, flush=True)
     
     if python:
       return j
@@ -276,10 +277,14 @@ class Helpers:
     return False
   
   @staticmethod
-  def replace_wsl_disk_with_windows(path):
-    if path:
-      return re.sub(r'/mnt/([a-z]{1})', r'\1:', path)
-    return None
+  def get_fields_from_param(param):
+    if param and '=' in param:
+      try:
+        key, value = param.split('=', 1)
+        return (key, value)
+      except:
+        pass
+    return (None, None)
 
 
 class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
@@ -287,14 +292,17 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
 
   def do_GET(self):
     # Strip leading '/' and keep the raw command string
-    command = self.path.lstrip('/')
+    urlparsed = urllib.parse.urlparse(self.path)
+    command = urlparsed.path.lstrip('/')
+    parameters = urllib.parse.parse_qs(urlparsed.query)
+    print(f"Received HTTP GET command: '{command}' with parameters: {parameters}", flush=True)
 
     # Create event to sync between backend and HTTP thread
     no_timeout_event = threading.Event()
     success_event = threading.Event()
 
     # Store the command where the worker thread can see it
-    self.server.command_queue.put((command, no_timeout_event, success_event))
+    self.server.command_queue.put((command, parameters, no_timeout_event, success_event))
 
     no_timeout = no_timeout_event.wait(15) # Wait up to 15 seconds for the command to be processed
     success = success_event.is_set()
@@ -317,35 +325,44 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
 
 
 # Main code
-def main_code():
-  ml = MusicLister(COMPOSITIONS_FOLDER)
+def main_code(composition_folder, database_file):
+  ml = MusicLister(composition_folder, database_file)
   ml.export_json()
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
-  next_refresh_time = time.time() # To start, right now
+  global COMPOSITIONS_FOLDER
+  global DATABASE_FILE
 
   while not stop_event.is_set():
     try:
-      command, no_timeout_event, success_event = httpd.command_queue.get(timeout=1)
+      command, parameters, no_timeout_event, success_event = httpd.command_queue.get(timeout=1)
     except queue.Empty:
-      command, no_timeout_event, success_event = None, None, None
+      command, parameters, no_timeout_event, success_event = None, None, None, None
 
-    if command:
-      print(f"Received data on HTTP server: '{command}'", flush=True)
+    if not command:
+      continue
+
+    print(f"Received data on HTTP server: '{command}' '{parameters}'", flush=True)
 
     try:
       command_valid = command in ["refresh"]
-      auto_refresh = command is None and time.time() >= next_refresh_time
-
-      if command_valid or auto_refresh:
+      if command_valid:
         print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), flush=True)
 
-        data = "SUCCESS"
-        if command == "refresh" or auto_refresh:
+        if command == "refresh":
           print("Scanning for compositions...", flush=True)
-          main_code()
-          next_refresh_time = time.time() + UPDATE_FREQUENCY
+          if "composition_folder" in parameters and parameters["composition_folder"][0]:
+            new_potential_composition_folder = parameters["composition_folder"][0]
+            if os.path.isdir(new_potential_composition_folder):
+              print(f"New compositions folder: {new_potential_composition_folder}", flush=True)
+              COMPOSITIONS_FOLDER = new_potential_composition_folder
+            else:
+              print(f"Error: Path is invalid {new_potential_composition_folder}", flush=True)
+
+          print(f"Will use: {COMPOSITIONS_FOLDER}", flush=True)
+
+          main_code(COMPOSITIONS_FOLDER, DATABASE_FILE)
 
         if success_event:
           success_event.set()
@@ -359,6 +376,15 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
   httpd.server_close()
 
 if __name__ == "__main__":
+  if len(sys.argv) != 2:
+    print("Usage: python music_lister.py <database_file_path>", flush=True)
+    sys.exit(1)
+  DATABASE_FILE = sys.argv[1]
+  if not os.path.isdir(os.path.dirname(DATABASE_FILE)):
+    print(f"Error: The directory for the database file does not exist: {os.path.dirname(DATABASE_FILE)}", flush=True)
+    sys.exit(1)
+  print(f"Using database file: {DATABASE_FILE}", flush=True)
+
   print("Starting music_lister...", flush=True)
   # Create the HTTP server (no threading – we’ll drive it manually)
   httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
@@ -370,7 +396,7 @@ if __name__ == "__main__":
 
   stop_flag = threading.Event()    
   main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
-  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT}) and max update time every {UPDATE_FREQUENCY}s.", flush=True)
+  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT})", flush=True)
   main_thread.start()
   
   server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
@@ -379,9 +405,12 @@ if __name__ == "__main__":
   try:
     # Main thread can stay idle or do other work.
     while True:
-      time.sleep(1)
+      time.sleep(5)
+      if not main_thread.is_alive():
+        print("Main thread has stopped unexpectedly. Stopping program.", flush=True)
+        break
   except KeyboardInterrupt:
-    print(f"\nStopping program… Please wait for completion (can take up to {UPDATE_FREQUENCY}s)…", flush=True)
+    print(f"\nStopping program… Please wait for completion (can take a few seconds)…", flush=True)
     stop_flag.set()
     main_thread.join()
     httpd.server_close()
