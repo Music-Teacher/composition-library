@@ -63,7 +63,7 @@ app.get('/composition/:id/audio', (req, res) => {
   console.log("Composition found with audio file " + compositions[index].audio_file);
   audio_relative_path = path.relative(__dirname, compositions[index].audio_file.replace("c:", "/mnt/c"));
   full_path = path.resolve(__dirname, audio_relative_path);
-  console.log("Full path: " + full_path);
+  console.log("Full audio path: " + full_path);
   res.sendFile(full_path);
 })
 
