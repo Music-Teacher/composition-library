@@ -155,16 +155,24 @@ button:active {
 }
 
 .controls .sort input + span {
-  margin-left: 0.5rem;
+  margin-left: 0.2rem;
   vertical-align: middle;
-  padding: 2px;
-  border-radius: 4px;
+  padding: 0px 6px;
   background: light-dark(#eee, #333);
+  color: light-dark(#000, #fff);
+}
+
+.controls .sort input + span::before {
+  content: "✗ ";
 }
 
 .controls .sort input:checked + span {
   background: light-dark(#333, #eee);
   color: light-dark(#eee, #333);
+}
+
+.controls .sort input:checked + span::before {
+  content: "✓ ";
 }
 
 .controls .filter {
@@ -177,9 +185,9 @@ button:active {
 
 .controls .filter input + span {
   display: inline-block;
-  background: light-dark(#999, #666);
+  background: light-dark(#eee, #333);
+  color: light-dark(#000, #fff);
   border-radius: 4px;
-  color: light-dark(#fff, #fff);
   padding: 2px 8px;
   cursor: pointer;
   margin-left: 2px;
