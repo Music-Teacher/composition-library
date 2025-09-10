@@ -25,7 +25,7 @@ h1 {
 }
 
 h1::before {
-  content: '🎵 ';
+  content: '🎶';
   font-size: 1.5em;
   vertical-align: middle;
 }
