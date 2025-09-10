@@ -44,7 +44,7 @@ if [[ ! -d "venv" ]]; then
 fi
 source venv/bin/activate
 pip install -r requirements.txt
-python music_lister.py > logs/music_lister.log 2>&1 &
+python music_lister.py ../database/database.json > logs/music_lister.log 2>&1 &
 PYTHON_BACK_PID=$(echo $!)
 deactivate
 cd $HOME
