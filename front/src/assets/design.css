@@ -135,6 +135,10 @@ h1::before {
   touch-action: manipulation;
 }
 
+.controls .refresh button::before {
+  content: "↻ ";
+}
+
 .controls .refresh button:hover:not(:disabled),
 .controls .refresh button:focus:not(:disabled) {
   background-color: #07c;
@@ -153,10 +157,6 @@ h1::before {
 .controls .refresh button:active {
   background-color: #0064bd;
   box-shadow: none;
-}
-
-.controls .refresh button::before{
-  content: "↻ ";
 }
 
 /* ===== Compositions Grid ===== */

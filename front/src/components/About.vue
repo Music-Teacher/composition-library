@@ -1,19 +1,49 @@
 <script setup>
-const props = defineProps(['aboutInfo'])
+import { store } from '../store/store.js'
 </script>
 
 <template>
   <div class="lister_details">
     <details>
-      <summary>About this list</summary>
+      <summary>About this library</summary>
       <ul>
-        <li>Root folder: <span class="file_path">{{ props.aboutInfo["root_folder"] }}</span></li>
-        <li>
-          Output JSON file:
-          <span class="file_path">{{ props.aboutInfo["output_json_file"] }}</span>
+        <li>Root folder: 
+          <span class="file_path">
+            <input type="text" :placeholder="rootFolder" v-model="localRootFolder" />
+            <button @click="validateFolder" :disabled="localRootFolder === rootFolder">Validate</button>
+          </span>
         </li>
-        <li>Number of compositions: {{ props.aboutInfo["number_of_compositions"] }}</li>
+        <li>
+          Database file:
+          <span class="file_path">{{ databaseFile }}</span>
+        </li>
+        <li>Number of compositions: {{ numberOfCompositions }}</li>
       </ul>
     </details>
   </div>
 </template>
+
+<script>
+export default {
+  props: [
+    'rootFolder',
+    'databaseFile',
+    'numberOfCompositions'
+  ],
+  data() {
+    return {
+      localRootFolder: ''
+    }
+  },
+  async mounted () {
+    await store.fetchAboutInfo();
+    this.localRootFolder = this.rootFolder;
+  },
+  methods: {
+    async validateFolder(event) {
+      console.log("Validating folder:", this.localRootFolder);
+      console.log("Previous folder:", this.rootFolder);
+    }
+  }
+}
+</script>

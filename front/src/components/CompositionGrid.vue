@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { store } from '../store/store.js'
 import CompositionItem from './CompositionItem.vue'
 </script>
 
@@ -27,7 +27,7 @@ import CompositionItem from './CompositionItem.vue'
       </label>
     </div>
     <div class="refresh">
-      <button id="refreshButton" @click="fetchCompositions" :disabled="refreshing">Refresh</button>
+      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">Refresh</button>
     </div>
   </div>
   <div class="compositions">
@@ -57,7 +57,6 @@ import CompositionItem from './CompositionItem.vue'
 export default {
   data() {
     return {
-      compositions: [],
       pollingInterval: null,
       sortBy: "",
       refreshing: false,
@@ -68,7 +67,7 @@ export default {
   computed: {
     sortedFilteredCompositions() {
       console.log("Sort:", this.sortBy, "Filter Finished:", this.onlyFinished, "Filter In Progress:", this.onlyInProgress);
-      let outputCompositions = this.compositions.slice(); // Create a copy of the array
+      let outputCompositions = store.compositions.slice(); // Create a copy of the array
 
       // Filtering
       if (this.onlyFinished) {
@@ -97,13 +96,19 @@ export default {
       return outputCompositions;
     },
   },
-  mounted() {
-    this.sortBy = 'activity';
+  async mounted() {
+    await store.fetchCompositions();
+    await store.refreshDatabase();
+    await store.fetchCompositions();
   },
   created() {
-    this.fetchCompositions();
+    this.sortBy = 'activity';
   },
   methods: {
+    async syncCompositions() {
+      await store.refreshDatabase();
+      await store.fetchCompositions();
+    },
     sortCompositions() {
       this.$forceUpdate();
     },
@@ -114,38 +119,6 @@ export default {
     filterInProgress() {
       this.onlyFinished = false;
       this.$forceUpdate();
-    },
-    async refresh_database() {
-      console.log("Refreshing database...");
-      try {
-        const response = await fetch('http://localhost:5556/refresh_database');
-        if (!response.ok) {
-          throw new Error('Failed to fetch composition IDs');
-        }
-        const data = await response.json();
-      } catch (error) {
-        console.error('Error fetching composition IDs:', error);
-      }
-      console.log("Database refreshed.");
-    },
-    async fetchCompositions() {
-      console.log("Fetching compositions...");
-      this.refreshing = true;
-      try {
-        await this.refresh_database();
-        const response = await fetch('http://localhost:5556/compositions');
-        if (!response.ok) {
-          throw new Error('Failed to fetch compositions');
-        }
-        const data = await response.json();
-        this.$nextTick(() => {
-          this.compositions = data; // Assuming the API returns an array of IDs
-        });
-      } catch (error) {
-        console.error('Error fetching composition IDs:', error);
-      }
-      this.refreshing = false;
-      console.log("Compositions fetched.");
     },
   }
 }
