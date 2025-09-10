@@ -24,7 +24,13 @@ read_database();
 // Configure routes
 app.get('/refresh_database', (req, res) => {
   console.log("Looking to update database");
-  request('http://' + PYTHON_BACKEND_URL + '/refresh', function (error, response, body) {
+  add_query = '';
+  if(req.query.composition_folder) {
+    console.log("With new composition folder: " + req.query.composition_folder);
+    const params = new URLSearchParams(req.query);
+    add_query = '?' + params.toString();
+  }
+  request('http://' + PYTHON_BACKEND_URL + '/refresh' + add_query, function (error, response, body) {
     if (error) {
       console.error('Error making request:', error);
       res.status(500).send('Error making request');

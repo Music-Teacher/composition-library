@@ -12,9 +12,9 @@ import urllib.parse
 
 # DEFAULT GLOBAL PARAMETERS
 # Database export file
-DATABASE_FILE="../database/database.json"
+DATABASE_FILE = None
 # Folder to search into for compositions
-COMPOSITIONS_FOLDER="/mnt/c/Users/obrun/Music/Compositions"
+COMPOSITIONS_FOLDER = "/mnt/c/Users/obrun/Music/Compositions"
 #####
 
 # Current script path
@@ -158,16 +158,23 @@ class MusicLister:
     self.look_for_als(root_folder)
   
   def look_for_als(self, path):
+    """"Recursively look for Ableton Live Sets in the given path."""
+
+    # If ALS file, add it to the list
     if Helpers.is_als(path):
       self.compositions[path] = Composition(path, self.root_folder)
-    
+
+    # If file but not ALS, ignore
     if os.path.isfile(path):
       return
 
+    # Check if ALS present in this folder
     als_present = Helpers.is_als_present_in_path(path)
 
+    # Browse all elements (files and dirs) in this folder
     for element in os.listdir(path):
       next_path = os.path.join(path, element)
+      # If ALS present in this folder, don't look at dirs below
       if als_present and os.path.isdir(next_path):
         continue
       self.look_for_als(next_path)
@@ -379,6 +386,7 @@ if __name__ == "__main__":
   if len(sys.argv) != 2:
     print("Usage: python music_lister.py <database_file_path>", flush=True)
     sys.exit(1)
+
   DATABASE_FILE = sys.argv[1]
   if not os.path.isdir(os.path.dirname(DATABASE_FILE)):
     print(f"Error: The directory for the database file does not exist: {os.path.dirname(DATABASE_FILE)}", flush=True)
