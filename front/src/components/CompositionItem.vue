@@ -1,4 +1,6 @@
-<script setup></script>
+<script setup>
+import { store } from '../store/store.js'
+</script>
 
 <template>
   <div :class="{ composition: true, finished: status === 'Finished' }">
@@ -6,21 +8,26 @@
     <h3 class="artist">Artist: {{ artist }}</h3>
     <h3 class="album">Album: {{ album }}</h3>
     <p class="status">Status: {{ status }}</p>
-    <div class="activity_path">
+    <div class="composition_main_info">
       <p class="last_activity">
         Last modified: <span>{{ last_activity }}</span>
       </p>
       <p class="als_file_path">
-        File path: <span>{{ als_file_path }}</span>
+        File path: <span>'{{ als_file_path }}'</span>
       </p>
-      <p class="audio_file">
-        <audio controls v-if="audio_file">
-          <source :src="audio_source" :type="'audio/' + audio_extension" />
+      <p v-if="has_main_audio_file" class="audio_file">
+        Latest audio file: <span>'{{ main_audio_file_name }}'</span>
+      </p>
+      <p v-else class="audio_file" :class="{ not_exported: project_finished }">
+        Sound file not exported
+      </p>
+      <p v-if="has_main_audio_file" class="audio_source">
+        <audio controls>
+          <source :src="main_audio_file_source" :type="'audio/' + main_audio_extension" />
         </audio>
-        <span v-else>Sound file exported</span>
       </p>
     </div>
-    <details>
+    <details class="composition_details">
       <summary>More info</summary>
       <table border="0" cellpadding="5">
         <tbody>
@@ -31,6 +38,20 @@
           <tr>
             <th>Chords</th>
             <td>{{ chords }}</td>
+          </tr>
+          <tr v-if="has_other_audio_files">
+            <th>Other audio</th>
+            <td>
+              <p v-for="audio_file in other_audio_files" class="audio_source">
+                {{ audio_file_name(audio_file) }}<br />
+                <audio controls controlslist="play nofullscreen nodownload noplaybackrate">
+                  <source
+                    :src="audio_file_source(audio_file)"
+                    :type="'audio/' + audio_extension(audio_file)"
+                  />
+                </audio>
+              </p>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -55,44 +76,57 @@ export default {
     'project_dir',
     'root_folder',
     'als_file_name',
-    'audio_file',
+    'audio_files',
     'last_activity',
   ],
   computed: {
-    audio_source() {
-      return this.audio_file ? `http://localhost:5556/composition/${this.id}/audio` : null
+    project_finished() {
+      return this.status === 'Finished'
     },
-    audio_extension() {
-      if (this.audio_file) {
-        const parts = this.audio_file.split('.')
-        return parts.length > 1 ? parts[parts.length - 1] : null
+    number_of_audio_files() {
+      return this.audio_files.length
+    },
+    has_main_audio_file() {
+      return this.number_of_audio_files >= 1
+    },
+    has_other_audio_files() {
+      return this.number_of_audio_files >= 2
+    },
+    main_audio_file_source() {
+      if (this.has_main_audio_file) {
+        return this.audio_file_source(this.audio_files[0])
+      }
+    },
+    main_audio_file_name() {
+      if (this.has_main_audio_file) {
+        return this.audio_file_name(this.audio_files[0])
+      }
+      return null
+    },
+    main_audio_extension() {
+      if (this.has_main_audio_file) {
+        return this.audio_extension(this.audio_files[0])
+      }
+      return null
+    },
+    other_audio_files() {
+      if (this.has_other_audio_files) {
+        return this.audio_files.slice(1)
       }
       return null
     },
   },
-  // mounted() {
-  //   if (this.audio_file) {
-  //     this.importAudio();
-  //   }
-  // },
-  // methods: {
-  //   async importAudio() {
-  //     if (this.audio_file) {
-  //       console.log("Importing audio file:", this.audio_file);
-  //       this.audio_source = await import("../hello.wav");
-  //     }
-  //     console.log("Importing music");
-  //     try {
-  //       const response = await fetch('http://localhost:5556/refresh_database');
-  //       if (!response.ok) {
-  //         throw new Error('Failed to fetch composition IDs');
-  //       }
-  //       const data = await response.json();
-  //     } catch (error) {
-  //       console.error('Error fetching composition IDs:', error);
-  //     }
-  //     console.log("Database refreshed.");
-  //   }
-  // }
+  methods: {
+    audio_extension(audio_file_path) {
+      const parts = audio_file_path.split('.')
+      return parts.length > 1 ? parts[parts.length - 1] : null
+    },
+    audio_file_name(audio_file_path) {
+      return audio_file_path.substring(audio_file_path.lastIndexOf('/') + 1)
+    },
+    audio_file_source(audio_file_path) {
+      return store.getMainAudioSource(audio_file_path)
+    },
+  },
 }
 </script>

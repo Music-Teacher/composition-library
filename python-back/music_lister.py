@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import glob
 import threading
 import datetime
 import time
@@ -44,7 +45,7 @@ class Composition:
   project_dir = None
   root_folder = None
   als_file_name = None
-  audio_file = None
+  audio_files = None
   last_activity = None
 
   def __init__(self, als_file_path, root_folder=None):
@@ -54,7 +55,7 @@ class Composition:
     self.als_file_name = os.path.basename(als_file_path)
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
-    self.audio_file = Helpers.get_audio_file_related_to_als(self.als_file_path)
+    self.audio_files = Helpers.get_audio_files_related_to_als(self.als_file_path)
     self.name = None
     self.artist = None
     self.album = None
@@ -114,7 +115,7 @@ class Composition:
       return_string += f" - Extra Info:\n"
       return_string += f"{self.extra_info}\n"
     return_string += f"{self.als_file_path}\n\n"
-    audio_generated = "exported" if self.audio_file else "not exported"
+    audio_generated = "exported" if self.audio_files else "not exported"
     return_string += f" -> Audio file {audio_generated}"
     return return_string
 
@@ -131,11 +132,11 @@ class Composition:
     j["status"] = self.status
     j["rework"] = self.rework
 
-    j["als_file_path"] = self.als_file_path
+    j["als_file_path"] = self.getShortenedFilePath()
     j["project_dir"] = self.project_dir
     j["root_folder"] = self.root_folder
     j["als_file_name"] = self.als_file_name
-    j["audio_file"] = self.audio_file
+    j["audio_files"] = self.audio_files
     j["last_activity"] = self.last_activity
 
     if python:
@@ -241,13 +242,28 @@ class Helpers:
     if os.path.isfile(file_path):
       return file_path
     return None
+  
+  @staticmethod
+  def is_audio_file(file_path):
+    if not os.path.isfile(file_path):
+      return False
+    list_of_extensions = ["mp3", "wav", "ogg"]
+    file_name = os.path.basename(file_path)
+    if '.' in file_name and file_name.split('.')[-1] in list_of_extensions:
+      return True
+    return False
 
   @staticmethod
-  def get_audio_file_related_to_als(path):
-    file_path = path.replace(".als", ".wav")
-    if os.path.isfile(file_path):
-      return file_path
-    return None
+  def get_audio_files_related_to_als(als_file_path):
+    audio_files = []
+    als_dir = os.path.dirname(als_file_path)
+    files = list(filter(os.path.isfile, glob.glob(als_dir + "/*")))
+    files.sort(key=lambda x: os.path.getmtime(x))
+    files.reverse()
+    for file in files:
+      if Helpers.is_audio_file(file):
+        audio_files.append(os.path.join(als_dir, file))
+    return audio_files
 
   @staticmethod
   def get_fields_from_file(path):

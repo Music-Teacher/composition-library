@@ -6,10 +6,11 @@ export const store = reactive({
   compositions: [],
   isLoading: false,
   error: null,
+  serverUrl: 'http://localhost:5556',
   async fetchCompositions() {
     console.log('Fetching compositions...')
     try {
-      const response = await fetch('http://localhost:5556/compositions')
+      const response = await fetch(this.serverUrl + '/compositions')
       if (!response.ok) {
         throw new Error('Failed to fetch compositions')
       }
@@ -26,8 +27,7 @@ export const store = reactive({
     console.log('Refreshing database...')
     try {
       const param = 'composition_folder=' + encodeURIComponent(this.rootFolder)
-      console.log(param)
-      const response = await fetch('http://localhost:5556/refresh_database?' + param)
+      const response = await fetch(this.serverUrl + '/refresh_database?' + param)
       if (!response.ok) {
         throw new Error('Failed to fetch composition IDs')
       }
@@ -40,7 +40,7 @@ export const store = reactive({
   },
   async fetchAboutInfo() {
     try {
-      const response = await fetch('http://localhost:5556/basicinfo')
+      const response = await fetch(this.serverUrl + '/basicinfo')
       if (!response.ok) {
         throw new Error('Failed to fetch basic info')
       }
@@ -50,5 +50,8 @@ export const store = reactive({
     } catch (error) {
       console.error('Error fetching composition IDs:', error)
     }
+  },
+  getMainAudioSource(fullAudioPath) {
+    return this.serverUrl + '/audiostream?file=' + encodeURIComponent(fullAudioPath)
   },
 })

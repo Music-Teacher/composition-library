@@ -54,7 +54,7 @@ import CompositionItem from './CompositionItem.vue'
       :project_dir="composition['project_dir']"
       :root_folder="composition['root_folder']"
       :als_file_name="composition['als_file_name']"
-      :audio_file="composition['audio_file']"
+      :audio_files="composition['audio_files']"
       :last_activity="composition['last_activity']"
     />
   </div>

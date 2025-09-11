@@ -1,8 +1,9 @@
 const express = require('express')
 const cors = require('cors');
 const request = require('postman-request');
-var path = require('path');
-var _ = require('lodash')
+const path = require('path');
+const fs = require('fs');
+const _ = require('lodash')
 
 // Set up express server
 const app = express()
@@ -13,8 +14,6 @@ const port = 5556
 PYTHON_BACKEND_URL = "localhost:5555"
 
 // Initialise database file
-var fs = require('fs');
-const { DiffieHellmanGroup } = require('crypto');
 var database;
 const read_database = () => {
   database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
@@ -58,19 +57,17 @@ app.get('/compositions', (req, res) => {
   res.json(compositions); // Send the array as JSON
 })
 
-app.get('/composition/:id/audio', (req, res) => {
-  console.log("Looking for song of composition id: " + req.params.id);
-  const compositions = database.compositions;
-  const index = _.findIndex(compositions, {'id': req.params.id});
-  if (index == -1 || compositions[index].audio_file === "null") {
+app.get('/audiostream', (req, res) => {
+  if(!req.query.file) {
+    res.status(500).send('No file provided');
+  }
+  const full_audio_path = decodeURIComponent(req.query.file)
+  console.log("Full audio path: " + full_audio_path);
+  if(!fs.existsSync(full_audio_path)) {
     res.status(404).send('Composition not found');
     return;
   }
-  console.log("Composition found with audio file " + compositions[index].audio_file);
-  audio_relative_path = path.relative(__dirname, compositions[index].audio_file.replace("c:", "/mnt/c"));
-  full_path = path.resolve(__dirname, audio_relative_path);
-  console.log("Full audio path: " + full_path);
-  res.sendFile(full_path);
+  res.sendFile(full_audio_path);
 })
 
 app.listen(port, () => {
