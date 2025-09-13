@@ -3,17 +3,25 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div :class="{ composition: true, finished: status === 'Finished' }">
-    <h2 class="songname">{{ name }}</h2>
-    <h3 class="artist">Artist: {{ artist }}</h3>
-    <h3 class="album">Album: {{ album }}</h3>
-    <p class="status">Status: {{ status }}</p>
+  <div class="composition" :class="{ finished: project_finished, unfinished: !project_finished }">
+    <h2 class="songname">{{ composition.title }}</h2>
+    <h3 class="artist">Artist: {{ composition.artist }}</h3>
+    <h3 class="album">Album: {{ composition.album }}</h3>
+    <p class="status" v-if="project_finished">{{ composition.status }}</p>
+    <p
+      class="rework"
+      :class="{ rework_multiple_lines: !!rework_multiple_lines }"
+      v-if="!project_finished && needs_rework"
+    >
+      <span>Rework: </span>
+      <span>{{ composition.rework }}</span>
+    </p>
     <div class="composition_main_info">
       <p class="last_activity">
-        Last modified: <span>{{ last_activity }}</span>
+        Last activity: <span>{{ composition.last_activity }}</span>
       </p>
       <p class="als_file_path">
-        File path: <span>'{{ als_file_path }}'</span>
+        File path: <span>'{{ shortened_als_file_path }}'</span>
       </p>
       <p v-if="has_main_audio_file" class="audio_file">
         Latest audio file: <span>'{{ main_audio_file_name }}'</span>
@@ -33,11 +41,11 @@ import { store } from '../store/store.js'
         <tbody>
           <tr>
             <th>Lyrics</th>
-            <td>{{ lyrics }}</td>
+            <td>{{ composition.lyrics }}</td>
           </tr>
           <tr>
             <th>Chords</th>
-            <td>{{ chords }}</td>
+            <td>{{ composition.chords }}</td>
           </tr>
           <tr v-if="has_other_audio_files">
             <th>Other audio</th>
@@ -61,30 +69,19 @@ import { store } from '../store/store.js'
 
 <script>
 export default {
-  props: [
-    'id',
-    'name',
-    'artist',
-    'album',
-    'ep',
-    'lyrics',
-    'chords',
-    'extra_info',
-    'status',
-    'rework',
-    'als_file_path',
-    'project_dir',
-    'root_folder',
-    'als_file_name',
-    'audio_files',
-    'last_activity',
-  ],
+  props: ['composition'],
   computed: {
     project_finished() {
-      return this.status === 'Finished'
+      return this.composition.status === 'Finished'
+    },
+    needs_rework() {
+      return !!this.composition.rework
+    },
+    rework_multiple_lines() {
+      return this.composition.rework.includes('\n')
     },
     number_of_audio_files() {
-      return this.audio_files.length
+      return this.composition.audio_files.length
     },
     has_main_audio_file() {
       return this.number_of_audio_files >= 1
@@ -94,26 +91,29 @@ export default {
     },
     main_audio_file_source() {
       if (this.has_main_audio_file) {
-        return this.audio_file_source(this.audio_files[0])
+        return this.audio_file_source(this.composition.audio_files[0])
       }
     },
     main_audio_file_name() {
       if (this.has_main_audio_file) {
-        return this.audio_file_name(this.audio_files[0])
+        return this.shorten_string(this.audio_file_name(this.composition.audio_files[0]), 20, false)
       }
       return null
     },
     main_audio_extension() {
       if (this.has_main_audio_file) {
-        return this.audio_extension(this.audio_files[0])
+        return this.audio_extension(this.composition.audio_files[0])
       }
       return null
     },
     other_audio_files() {
       if (this.has_other_audio_files) {
-        return this.audio_files.slice(1)
+        return this.composition.audio_files.slice(1)
       }
       return null
+    },
+    shortened_als_file_path() {
+      return this.shorten_string(this.composition.als_file_path, 25, true)
     },
   },
   methods: {
@@ -126,6 +126,19 @@ export default {
     },
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)
+    },
+    shorten_string(text, maxchars, middle) {
+      if (this.composition.als_file_path.length >= maxchars) {
+        if (!!middle) {
+          const start = text.substring(0, maxchars / 2)
+          const end = text.substring(text.length - maxchars / 2, text.length)
+          const middle = text.includes('/') ? '.../...' : '.....'
+          return start + middle + end
+        } else {
+          return '...' + text.substring(text.length - maxchars, text.length)
+        }
+      }
+      return text
     },
   },
 }

@@ -21,6 +21,11 @@ import { store } from '../store/store.js'
         <li class="number_of_compositions">Number of compositions: {{ numberOfCompositions }}</li>
       </ul>
     </details>
+    <div class="refresh">
+      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">
+        Refresh
+      </button>
+    </div>
   </div>
 </template>
 
@@ -41,6 +46,10 @@ export default {
       console.log('Validating folder:', this.localRootFolder)
       console.log('Previous folder:', this.rootFolder)
       store.rootFolder = this.localRootFolder
+    },
+    async syncCompositions() {
+      await store.refreshDatabase()
+      await store.fetchCompositions()
     },
   },
 }

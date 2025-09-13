@@ -20,43 +20,21 @@ import CompositionItem from './CompositionItem.vue'
       </label>
     </div>
     <div class="filter">
-      Only show:
-      <label>
-        <input v-model="onlyFinished" @change="filterFinished" type="checkbox" />
-        <span>Finished</span>
-      </label>
-      <label>
-        <input v-model="onlyInProgress" @change="filterInProgress" type="checkbox" />
-        <span>In Progress</span>
-      </label>
-    </div>
-    <div class="refresh">
-      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">
-        Refresh
-      </button>
+      <span v-for="(information, filter) in filtersAvailable">
+        {{ filter[0].toUpperCase() + filter.slice(1) }}:
+        <label v-for="value in information[0]">
+          <input
+            v-model="filtersSelected[make_filter_index(filter, value)]"
+            @change="toggleFilter(filter, value, information[1])"
+            type="checkbox"
+          />
+          <span>{{ value }}</span>
+        </label>
+      </span>
     </div>
   </div>
   <div class="compositions">
-    <CompositionItem
-      v-for="composition in sortedFilteredCompositions"
-      :id="composition['id']"
-      :key="composition['als_file_path']"
-      :name="composition['name']"
-      :artist="composition['artist']"
-      :album="composition['album']"
-      :ep="composition['ep']"
-      :lyrics="composition['lyrics']"
-      :chords="composition['chords']"
-      :extra_info="composition['extra_info']"
-      :status="composition['status']"
-      :rework="composition['rework']"
-      :als_file_path="composition['als_file_path']"
-      :project_dir="composition['project_dir']"
-      :root_folder="composition['root_folder']"
-      :als_file_name="composition['als_file_name']"
-      :audio_files="composition['audio_files']"
-      :last_activity="composition['last_activity']"
-    />
+    <CompositionItem v-for="composition in sortedFilteredCompositions" :composition="composition" />
   </div>
 </template>
 
@@ -68,11 +46,24 @@ export default {
       sortBy: 'activity',
       reverseSort: false,
       refreshing: false,
+      filtersSelected: {},
       onlyFinished: false,
       onlyInProgress: false,
     }
   },
   computed: {
+    filtersAvailable() {
+      const filters = ['status', 'artist', 'album', 'ep']
+      let filtersAvailable = {}
+      filters.forEach((filter) => {
+        const filterValues = this.uniqueFilterArray(filter)
+        if (filterValues.length >= 2) {
+          const exclusive = filterValues.length == 2 ? true : false
+          filtersAvailable[filter] = [filterValues, exclusive]
+        }
+      })
+      return filtersAvailable
+    },
     sortedFilteredCompositions() {
       console.log(
         'Sort:',
@@ -84,34 +75,47 @@ export default {
         'Filter In Progress:',
         this.onlyInProgress,
       )
-      let outputCompositions = store.compositions.slice() // Create a copy of the array
+      let outputCompositions = store.compositions.slice()
 
-      // Filtering
-      if (this.onlyFinished) {
-        outputCompositions = outputCompositions.filter((c) => c.status === 'Finished')
-      } else if (this.onlyInProgress) {
-        outputCompositions = outputCompositions.filter((c) => c.status !== 'Finished')
-      }
+      // Whole filtering
+      outputCompositions = outputCompositions.filter((c) => {
+        let categoryMatch = {}
+        for (let filter in this.filtersSelected) {
+          const filterName = filter.split(':')[0]
+          const filterValue = filter.split(':')[1]
+          if (!!this.filtersSelected[filter]) {
+            if (c[filterName] === filterValue) {
+              categoryMatch[filterName] = true
+              continue
+            }
+            if (!(filterName in categoryMatch)) {
+              categoryMatch[filterName] = false
+            }
+          }
+        }
+        if (Object.values(categoryMatch).every((item) => item === true)) return true
+      })
 
       // Sorting
       outputCompositions = outputCompositions.sort((a, b) => {
         let returnValue = 0
-        if (this.sortBy === 'activity') {
-          returnValue = new Date(b.last_activity) - new Date(a.last_activity)
-        } else if (this.sortBy === 'status') {
-          if (a.status === b.status) returnValue = 0
-          else if (a.status === 'Finished') returnValue = -1
-          else returnValue = 1
-        } else if (this.sortBy === 'title') {
-          returnValue = a.name.localeCompare(b.name)
-        } else if (this.sortBy === 'artist') {
-          returnValue = a.artist.localeCompare(b.artist)
-        } else if (this.sortBy === 'album') {
-          returnValue = a.album.localeCompare(b.album)
+        let reverse = !!this.reverseSort ? -1 : 1
+        switch (this.sortBy) {
+          case 'activity':
+            returnValue = new Date(b.last_activity) - new Date(a.last_activity)
+            break
+          case 'status':
+            if (a.status === b.status) returnValue = 0
+            else if (a.status === 'Finished') returnValue = -1
+            else returnValue = 1
+            break
+          case 'title':
+          case 'artist':
+          case 'album':
+            returnValue = a[this.sortBy].localeCompare(b[this.sortBy])
+            break
         }
-        if (this.reverseSort == true) {
-          return returnValue * -1
-        }
+        returnValue *= reverse
         return returnValue
       })
       return outputCompositions
@@ -137,10 +141,6 @@ export default {
     }, 30000) // 30 seconds
   },
   methods: {
-    async syncCompositions() {
-      await store.refreshDatabase()
-      await store.fetchCompositions()
-    },
     sortCompositions() {
       this.$forceUpdate()
     },
@@ -151,6 +151,23 @@ export default {
     filterInProgress() {
       this.onlyFinished = false
       this.$forceUpdate()
+    },
+    uniqueFilterArray(key) {
+      const array = store.compositions.filter((c) => !!c[key]).map((c) => c[key])
+      return [...new Set(array)]
+    },
+    toggleFilter(filter, value, exclusive) {
+      if (!!exclusive) {
+        this.filtersAvailable[filter][0].forEach((e) => {
+          if (e !== value) {
+            this.filtersSelected[this.make_filter_index(filter, e)] = false
+          }
+        })
+      }
+      console.log(this.filtersSelected)
+    },
+    make_filter_index(filter, value) {
+      return filter + ':' + value
     },
   },
 }

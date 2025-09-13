@@ -17,7 +17,7 @@ body {
 /* ===== Header ===== */
 h1 {
   text-align: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.3rem;
   font-size: 1.8rem;
   font-weight: 600;
   color: light-dark(#333, #ccc);
@@ -81,12 +81,13 @@ audio::-webkit-media-controls-enclosure {
   margin: 0 auto 0;
   font-size: 0.85rem;
   color: light-dark(#666, #999);
+  border-top: 1px solid light-dark(#eee, #111);
+  border-bottom: 1px solid light-dark(#eee, #111);
 }
 
 .lister_details details {
-  border-top: 1px solid light-dark(#eee, #111);
-  border-bottom: 1px solid light-dark(#eee, #111);
   padding: 0.5rem 0;
+  display: inline-block;
 }
 
 .lister_details summary {
@@ -104,6 +105,12 @@ audio::-webkit-media-controls-enclosure {
 .lister_details details[open] summary::after {
   content: ' ➖';
   color: #2ecc71;
+}
+
+.lister_details details table {
+  width: 80%;
+  border-collapse: collapse;
+  margin-top: 0.3rem;
 }
 
 .lister_details ul {
@@ -139,6 +146,15 @@ audio::-webkit-media-controls-enclosure {
 
 .lister_details .number_of_compositions::before {
   content: '🎼 ';
+}
+
+.lister_details .refresh {
+  float: inline-end;
+  display: block;
+}
+
+.lister_details .refresh button::before {
+  content: '↻ ';
 }
 
 /* ===== Sort and Filter Controls ===== */
@@ -188,11 +204,11 @@ audio::-webkit-media-controls-enclosure {
   margin-left: 1rem;
 }
 
-.controls .filter input {
+.controls input {
   display: none;
 }
 
-.controls .filter input + span {
+.controls input + span {
   display: inline-block;
   background: light-dark(#eee, #333);
   color: light-dark(#000, #fff);
@@ -202,18 +218,12 @@ audio::-webkit-media-controls-enclosure {
   margin-left: 2px;
 }
 
-.controls .filter input:checked + span {
+.controls input:checked + span {
   background: light-dark(#000, #fff);
   color: light-dark(#fff, #000);
 }
 
-.controls .refresh {
-  float: inline-end;
-}
-
-.controls .refresh button::before {
-  content: '↻ ';
-}
+/* ===== Tags In Controls ===== */
 
 /* ===== Compositions Grid ===== */
 .compositions {
@@ -233,10 +243,21 @@ audio::-webkit-media-controls-enclosure {
   -ms-transition: background-color 0.5s;
   -o-transition: background-color 0.5s;
   transition: background-color 0.5s;
+  position: relative;
 }
 
 .composition:hover {
   background-color: light-dark(#f6f6f6, #0b0b0b);
+}
+
+.composition.finished {
+  background: light-dark(#fafffa, #001100);
+  border-left: 3px solid #2ecc71;
+  padding-left: 0.7rem;
+}
+
+.composition.finished:hover {
+  background-color: light-dark(#ebffeb, #002200);
 }
 
 .composition .songname {
@@ -295,6 +316,7 @@ audio::-webkit-media-controls-enclosure {
   width: 100%;
   max-width: 250px;
   margin-top: 0.3rem;
+  height: 40px;
 }
 
 .composition_details .audio_source audio {
@@ -304,22 +326,29 @@ audio::-webkit-media-controls-enclosure {
   height: 30px;
 }
 
-/* ===== Status with Emoji ===== */
-.status {
+.composition .status {
   font-weight: 600;
   margin-bottom: 0.5rem;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  float: right;
+  position: absolute;
+  top: 10px;
+  right: 5px;
+  cursor: default;
+  opacity: 0.7;
 }
 
 .composition.unfinished .status {
   color: light-dark(#d33, rgb(231, 45, 45));
 }
 
-.composition .status::after {
-  content: ' 🚧';
-}
-
 .composition.finished .status {
   color: light-dark(#2ecc71, #09a94c);
+}
+
+.rework {
+  margin-bottom: 0.3rem;
 }
 
 .rework_multiple_lines span:first-of-type::after {
@@ -342,17 +371,6 @@ audio::-webkit-media-controls-enclosure {
 .rework::before {
   content: '🔁 ';
   color: #e67e22;
-}
-
-/* ===== Finished Composition Styling ===== */
-.composition.finished {
-  background: light-dark(#fafffa, #001100);
-  border-left: 3px solid #2ecc71;
-  padding-left: 0.7rem;
-}
-
-.composition.finished:hover {
-  background-color: light-dark(#ebffeb, #002200);
 }
 
 /* ===== Collapsible Extra Info (click to open) ===== */
@@ -409,11 +427,5 @@ details th {
 
   .composition {
     padding: 0.8rem;
-  }
-}
-
-@media screen and (max-width: 800px) {
-  .compositions {
-    display: inline;
   }
 }

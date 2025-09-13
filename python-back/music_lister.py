@@ -31,7 +31,7 @@ class Composition:
   """This class will hold the composition information.
   It will look for an info file on disk, based on the ALS file path given."""
 
-  name = None
+  title = None
   artist = None
   album = None
   ep = None
@@ -56,7 +56,7 @@ class Composition:
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
     self.audio_files = Helpers.get_audio_files_related_to_als(self.als_file_path)
-    self.name = None
+    self.title = None
     self.artist = None
     self.album = None
     self.ep = None
@@ -71,7 +71,7 @@ class Composition:
     info_file_path = Helpers.get_info_file_related_to_als(self.als_file_path)
     if info_file_path:
       info = Helpers.get_fields_from_file(info_file_path)
-      self.name = info.get("name", self.als_file_name) or self.als_file_name
+      self.title = info.get("title", self.als_file_name) or self.als_file_name
       self.artist = info.get("artist", None) or None
       self.album = info.get("album", None) or None
       self.ep = info.get("ep", None) or None
@@ -98,7 +98,7 @@ class Composition:
     return self.als_file_path
 
   def __str__(self):
-    return_string = f"# {self.artist+" - " if self.artist else ""}{self.name}\n"
+    return_string = f"# {self.artist+" - " if self.artist else ""}{self.title}\n"
     return_string += f"Last activity: {self.last_activity}"
     if self.album:
       return_string += f"-- Album: {self.album}"
@@ -122,7 +122,7 @@ class Composition:
   def __json__(self, python=True):
     j = dict()
     
-    j["name"] = self.name
+    j["title"] = self.title
     j["artist"] = self.artist
     j["album"] = self.album
     j["ep"] = self.ep
@@ -190,8 +190,8 @@ class MusicLister:
     return_string = f"\n###################\nRoot folder: {self.root_folder}\n"
     return_string += f"Number of compositions: {len(self.compositions)}\n"
     return_string += "\n"
-    for name in self.compositions:
-      return_string += f"{self.compositions[name]}"
+    for title in self.compositions:
+      return_string += f"{self.compositions[title]}"
     return_string += f"###################"
     return return_string
   
@@ -202,9 +202,9 @@ class MusicLister:
     j["number_of_compositions"] = len(self.compositions)
     j["compositions"] = []
     id = 0
-    for name in self.compositions:
-      dict_id = f"{id}-{abs(hash(self.compositions[name].als_file_path))}"
-      composition_dict = self.compositions[name].__json__()
+    for title in self.compositions:
+      dict_id = f"{id}-{abs(hash(self.compositions[title].als_file_path))}"
+      composition_dict = self.compositions[title].__json__()
       composition_dict["id"] = dict_id
       j["compositions"].append(composition_dict)
       id = id + 1
