@@ -348,6 +348,7 @@ details {
       }
     }
     .rework_multiple_lines {
+      white-space: pre-wrap;
       span:first-of-type::after {
         content: '⮧';
       }

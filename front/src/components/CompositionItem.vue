@@ -3,14 +3,14 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="composition" :class="{ finished: project_finished, unfinished: !project_finished }">
+  <div class="composition" :class="{ 'finished': project_finished, 'unfinished': !project_finished }">
     <h2 class="songname">{{ composition.title }}</h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
     <h3 class="album">Album: {{ composition.album }}</h3>
     <p class="status" v-if="project_finished">{{ composition.status }}</p>
     <p
       class="rework"
-      :class="{ rework_multiple_lines: !!rework_multiple_lines }"
+      :class="{ 'rework_multiple_lines': !!rework_multiple_lines }"
       v-if="!project_finished && needs_rework"
     >
       <span>Rework: </span>
@@ -35,7 +35,7 @@ import { store } from '../store/store.js'
           short_main_audio_file_name
         }}</span>
       </p>
-      <p v-else class="audio_file" :class="{ not_exported: project_finished }">
+      <p v-else class="audio_file" :class="{ 'not_exported': project_finished }">
         Sound file not exported
       </p>
       <p v-if="has_main_audio_file" class="audio_source">
