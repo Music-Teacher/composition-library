@@ -130,9 +130,12 @@ export default {
     shorten_string(text, maxchars, middle) {
       if (this.composition.als_file_path.length >= maxchars) {
         if (!!middle) {
-          const start = text.substring(0, maxchars / 2)
-          const end = text.substring(text.length - maxchars / 2, text.length)
-          const middle = text.includes('/') ? '.../...' : '.....'
+          let start = text.substring(0, maxchars / 2)
+          let end = text.substring(text.length - maxchars / 2, text.length)
+          let middle = '.....'
+          if(text.includes('/')) {
+            
+          }
           return start + middle + end
         } else {
           return '...' + text.substring(text.length - maxchars, text.length)

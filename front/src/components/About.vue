@@ -3,7 +3,7 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="lister_details">
+  <div class="lister_details menu_section">
     <details>
       <summary>About this library</summary>
       <ul>

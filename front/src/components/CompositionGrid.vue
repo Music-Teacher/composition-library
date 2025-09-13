@@ -4,7 +4,7 @@ import CompositionItem from './CompositionItem.vue'
 </script>
 
 <template>
-  <div class="controls">
+  <div class="controls menu_section">
     <div class="sort">
       <label for="sortSelect">Sort by: </label
       ><select v-model="sortBy" @change="sortCompositions" id="sortSelect">
@@ -19,9 +19,9 @@ import CompositionItem from './CompositionItem.vue'
         <span>reverse</span>
       </label>
     </div>
-    <div class="filter">
-      <span v-for="(information, filter) in filtersAvailable">
-        {{ filter[0].toUpperCase() + filter.slice(1) }}:
+    <div class="filters">
+      <div class="filter" v-for="(information, filter) in filtersAvailable">
+        <span class="filter_title">{{ filter[0].toUpperCase() + filter.slice(1) }}: </span>
         <label v-for="value in information[0]">
           <input
             v-model="filtersSelected[make_filter_index(filter, value)]"
@@ -30,7 +30,7 @@ import CompositionItem from './CompositionItem.vue'
           />
           <span>{{ value }}</span>
         </label>
-      </span>
+      </div>
     </div>
   </div>
   <div class="compositions">
@@ -136,8 +136,10 @@ export default {
   },
   beforeCreate() {
     this.pollingInterval = setInterval(async () => {
-      await store.refreshDatabase()
-      await store.fetchCompositions()
+      if(!store.isLoading) {
+        await store.refreshDatabase()
+        await store.fetchCompositions()
+      }
     }, 30000) // 30 seconds
   },
   methods: {
