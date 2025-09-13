@@ -6,8 +6,8 @@ import CompositionItem from './CompositionItem.vue'
 <template>
   <div class="controls menu_section">
     <div class="sort">
-      <label for="sortSelect">Sort by: </label
-      ><select v-model="sortBy" @change="sortCompositions" id="sortSelect">
+      <label for="sortSelect">Sort by: </label>
+      <select v-model="sortBy" @change="sortCompositions" id="sortSelect">
         <option value="activity">Last activity</option>
         <option value="status">Status</option>
         <option value="title">Title</option>
@@ -21,7 +21,7 @@ import CompositionItem from './CompositionItem.vue'
     </div>
     <div class="filters">
       <div class="filter" v-for="(information, filter) in filtersAvailable">
-        <span class="filter_title">{{ filter[0].toUpperCase() + filter.slice(1) }}: </span>
+        <span>{{ filter[0].toUpperCase() + filter.slice(1) }}: </span>
         <label v-for="value in information[0]">
           <input
             v-model="filtersSelected[make_filter_index(filter, value)]"

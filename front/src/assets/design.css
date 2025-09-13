@@ -205,11 +205,11 @@ details {
         display: inline-block;
       }
     }
-    .filter:last-of-type {
-      margin-bottom: 0;
-    }
-    .filter_title {
-      margin-left: 0.5rem;
+    .filter {
+      margin-right: 0.5rem;
+      &:last-of-type {
+        margin-bottom: 0;
+      }
     }
     input {
       display: none;
