@@ -94,11 +94,11 @@ details {
 }
 
 .text_information {
-  background-color: light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, .06));
+  background-color: light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.06));
   color: light-dark(#333, #ddd);
   border-radius: 4px;
   padding: 0.05rem;
-  cursor:default;
+  cursor: default;
 }
 
 /* ===== Info and Refresh Panel ===== */
@@ -206,7 +206,7 @@ details {
     display: inline-block;
     width: 70%;
     .filter {
-      display:inline-block;
+      display: inline-block;
 
       label {
         margin-bottom: 0.2rem;
@@ -322,7 +322,7 @@ details {
         height: 40px;
       }
     }
-    
+
     .status {
       font-weight: 600;
       margin-bottom: 0.5rem;
@@ -417,7 +417,7 @@ details {
   .root_folder button {
     font-size: 0px;
     &::after {
-      content: "✓";
+      content: '✓';
       font-size: 14px;
     }
   }
@@ -435,21 +435,21 @@ details {
     .filter {
       width: 100%;
       margin-left: 0;
-      padding-left: 0
+      padding-left: 0;
     }
   }
 
   .refresh {
-    position:absolute;
+    position: absolute;
     top: 0;
     right: 0;
-    display:inline;
+    display: inline;
     padding: 1rem;
     button {
       font-size: 0px;
       &::after {
-        content: "↻";
-        display:block;
+        content: '↻';
+        display: block;
         font-size: 14px;
       }
     }

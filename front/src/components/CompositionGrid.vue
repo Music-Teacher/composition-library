@@ -66,7 +66,7 @@ export default {
     },
     sortedFilteredCompositions() {
       console.log('Sort:', this.sortBy, 'Reverse:', this.reverseSort)
-      console.log("Filters:", JSON.stringify(this.filtersSelected))
+      console.log('Filters:', JSON.stringify(this.filtersSelected))
       let outputCompositions = store.compositions.slice()
 
       // Whole filtering
@@ -128,7 +128,7 @@ export default {
   },
   beforeCreate() {
     this.pollingInterval = setInterval(async () => {
-      if(!store.isLoading) {
+      if (!store.isLoading) {
         await store.refreshDatabase()
         await store.fetchCompositions()
       }

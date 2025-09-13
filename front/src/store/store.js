@@ -55,7 +55,7 @@ export const store = reactive({
     return this.serverUrl + '/audiostream?file=' + encodeURIComponent(fullAudioPath)
   },
   shorten_string(text, maxchars) {
-    const substring = text.substring(text.length - maxchars, text.length);
-    return substring === text ? text : '...' + substring;
+    const substring = text.substring(text.length - maxchars, text.length)
+    return substring === text ? text : '...' + substring
   },
 })
