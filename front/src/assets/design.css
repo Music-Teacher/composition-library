@@ -386,6 +386,7 @@ details {
       text-align: left;
       border-bottom: 1px solid light-dark(#f0f0f0, #cccccc);
       vertical-align: top;
+      white-space: pre-wrap;
     }
 
     th {
