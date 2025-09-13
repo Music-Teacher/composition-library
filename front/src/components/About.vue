@@ -27,7 +27,12 @@ import { store } from '../store/store.js'
       </ul>
     </details>
     <div class="refresh">
-      <button id="refreshButton" @click="syncCompositions" :disabled="store.isLoading">
+      <button
+        id="refreshButton"
+        title="Press letter 'r' to refresh"
+        @click="syncCompositions"
+        :disabled="store.isLoading"
+      >
         Refresh
       </button>
     </div>
@@ -45,6 +50,10 @@ export default {
   async mounted() {
     await store.fetchAboutInfo()
     this.localRootFolder = this.rootFolder
+    document.addEventListener('keyup', this.onKeyUp)
+  },
+  beforeDestroy() {
+    document.removeEventListener('keyup', this.onKeyUp)
   },
   methods: {
     async validateFolder(event) {
@@ -56,6 +65,12 @@ export default {
     async syncCompositions() {
       await store.refreshDatabase()
       await store.fetchCompositions()
+    },
+    async onKeyUp(event) {
+      if (event.key == 'r' && !store.isLoading) {
+        console.log("'r' pressed, refreshing compositions")
+        store.refreshDatabaseAndFetchCompositions()
+      }
     },
   },
 }

@@ -115,8 +115,7 @@ export default {
   },
   async mounted() {
     await store.fetchCompositions()
-    await store.refreshDatabase()
-    await store.fetchCompositions()
+    await store.refreshDatabaseAndFetchCompositions()
   },
   created() {
     this.sortBy = 'activity'
@@ -129,8 +128,7 @@ export default {
   beforeCreate() {
     this.pollingInterval = setInterval(async () => {
       if (!store.isLoading) {
-        await store.refreshDatabase()
-        await store.fetchCompositions()
+        await store.refreshDatabaseAndFetchCompositions()
       }
     }, 30000) // 30 seconds
   },

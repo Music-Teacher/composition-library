@@ -51,6 +51,10 @@ export const store = reactive({
       console.error('Error fetching composition IDs:', error)
     }
   },
+  async refreshDatabaseAndFetchCompositions() {
+    await this.refreshDatabase()
+    await this.fetchCompositions()
+  },
   getMainAudioSource(fullAudioPath) {
     return this.serverUrl + '/audiostream?file=' + encodeURIComponent(fullAudioPath)
   },
