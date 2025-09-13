@@ -18,13 +18,16 @@ import { store } from '../store/store.js'
     </p>
     <div class="composition_main_info">
       <p class="last_activity">
-        Last activity: <span>{{ composition.last_activity }}</span>
+        Last activity: 
+        <span class="text_information" :title="composition.last_activity">{{ pretty_last_activity }}</span>
       </p>
       <p class="als_file_path">
-        File path: <span>'{{ shortened_als_file_path }}'</span>
+        File name: 
+        <span class="text_information" :title="composition.als_file_path">{{ composition.als_file_name }}</span>
       </p>
       <p v-if="has_main_audio_file" class="audio_file">
-        Latest audio file: <span>'{{ main_audio_file_name }}'</span>
+        Latest audio: 
+        <span class="text_information" :title="main_audio_file_name">{{ short_main_audio_file_name }}</span>
       </p>
       <p v-else class="audio_file" :class="{ not_exported: project_finished }">
         Sound file not exported
@@ -96,9 +99,12 @@ export default {
     },
     main_audio_file_name() {
       if (this.has_main_audio_file) {
-        return this.shorten_string(this.audio_file_name(this.composition.audio_files[0]), 20, false)
+        return this.audio_file_name(this.composition.audio_files[0])
       }
       return null
+    },
+    short_main_audio_file_name() {
+      return store.shorten_string(this.main_audio_file_name, 20)
     },
     main_audio_extension() {
       if (this.has_main_audio_file) {
@@ -112,9 +118,9 @@ export default {
       }
       return null
     },
-    shortened_als_file_path() {
-      return this.shorten_string(this.composition.als_file_path, 25, true)
-    },
+    pretty_last_activity() {
+      return new Date(this.composition.last_activity).toDateString();
+    }
   },
   methods: {
     audio_extension(audio_file_path) {
@@ -126,22 +132,6 @@ export default {
     },
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)
-    },
-    shorten_string(text, maxchars, middle) {
-      if (this.composition.als_file_path.length >= maxchars) {
-        if (!!middle) {
-          let start = text.substring(0, maxchars / 2)
-          let end = text.substring(text.length - maxchars / 2, text.length)
-          let middle = '.....'
-          if(text.includes('/')) {
-            
-          }
-          return start + middle + end
-        } else {
-          return '...' + text.substring(text.length - maxchars, text.length)
-        }
-      }
-      return text
     },
   },
 }

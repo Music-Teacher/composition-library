@@ -16,7 +16,7 @@ import { store } from '../store/store.js'
         </li>
         <li class="database_file">
           Database file:
-          <span class="file_path">{{ databaseFile }}</span>
+          <span class="text_information">{{ databaseFile }}</span>
         </li>
         <li class="number_of_compositions">Number of compositions: {{ numberOfCompositions }}</li>
       </ul>
@@ -46,6 +46,7 @@ export default {
       console.log('Validating folder:', this.localRootFolder)
       console.log('Previous folder:', this.rootFolder)
       store.rootFolder = this.localRootFolder
+      this.syncCompositions()
     },
     async syncCompositions() {
       await store.refreshDatabase()

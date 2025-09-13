@@ -89,9 +89,16 @@ details {
   }
 }
 
-/* ===== For each Menu Section ===== */
 .menu_section {
   padding: 0.6rem 0;
+}
+
+.text_information {
+  background-color: light-dark(rgba(255, 255, 255, 0.8), rgba(255, 255, 255, .06));
+  color: light-dark(#333, #ddd);
+  border-radius: 4px;
+  padding: 0.05rem;
+  cursor:default;
 }
 
 /* ===== Info and Refresh Panel ===== */
@@ -119,9 +126,6 @@ details {
         }
       }
     }
-    .file_path {
-      font-style: italic;
-    }
     .root_folder {
       &::before {
         content: '📁 ';
@@ -131,8 +135,12 @@ details {
         width: 60%;
         margin-right: 0.3rem;
       }
+      button:disabled {
+        display: none;
+      }
     }
     .database_file {
+      overflow-wrap: break-word;
       &::before {
         content: '🛢️ ';
       }
@@ -292,9 +300,6 @@ details {
       color: #666;
       margin-bottom: 0.5rem;
       overflow-wrap: anywhere;
-      span {
-        font-style: italic;
-      }
       .last_activity::before {
         content: '⏱ ';
       }
