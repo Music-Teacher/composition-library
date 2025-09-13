@@ -9,7 +9,7 @@ import { store } from '../store/store.js'
       <ul>
         <li class="root_folder">
           Root folder:
-          <input type="text" :placeholder="rootFolder" v-model="localRootFolder" />
+          <input type="text" :placeholder="rootFolder" v-model="localRootFolder" name="localRootFolder" />
           <button @click="validateFolder" :disabled="localRootFolder === rootFolder">
             Validate
           </button>

@@ -65,16 +65,8 @@ export default {
       return filtersAvailable
     },
     sortedFilteredCompositions() {
-      console.log(
-        'Sort:',
-        this.sortBy,
-        'Reverse:',
-        this.reverseSort,
-        'Filter Finished:',
-        this.onlyFinished,
-        'Filter In Progress:',
-        this.onlyInProgress,
-      )
+      console.log('Sort:', this.sortBy, 'Reverse:', this.reverseSort)
+      console.log("Filters:", JSON.stringify(this.filtersSelected))
       let outputCompositions = store.compositions.slice()
 
       // Whole filtering
@@ -161,12 +153,12 @@ export default {
     toggleFilter(filter, value, exclusive) {
       if (!!exclusive) {
         this.filtersAvailable[filter][0].forEach((e) => {
-          if (e !== value) {
-            this.filtersSelected[this.make_filter_index(filter, e)] = false
+          const filterIndex = this.make_filter_index(filter, e)
+          if (e !== value && filterIndex in this.filtersSelected) {
+            this.filtersSelected[filterIndex] = false
           }
         })
       }
-      console.log(this.filtersSelected)
     },
     make_filter_index(filter, value) {
       return filter + ':' + value

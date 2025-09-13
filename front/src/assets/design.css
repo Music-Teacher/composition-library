@@ -112,6 +112,7 @@ details {
       list-style: none;
       text-indent: 0.3rem;
       li {
+        overflow-wrap: break-word;
         margin: 0.3rem 0;
         &::before {
           content: 'ℹ️ ';
@@ -131,11 +132,15 @@ details {
         margin-right: 0.3rem;
       }
     }
-    .database_file::before {
-      content: '🛢️ ';
+    .database_file {
+      &::before {
+        content: '🛢️ ';
+      }
     }
-    .number_of_compositions::before {
-      content: '🎼 ';
+    .number_of_compositions {
+      &::before {
+        content: '🎼 ';
+      }
     }
   }
 
@@ -164,7 +169,8 @@ details {
     display: inline-block;
     width: 30%;
     select {
-      padding: 2px 8px;
+      /* padding: 2px 8px; */
+      text-overflow: clip;
     }
     input {
       display: none;
@@ -391,16 +397,56 @@ details {
 }
 
 /* ===== Responsive ===== */
-@media (max-width: 600px) {
+@media (max-width: 500px) {
   body {
     padding: 0.5rem;
+    line-height: 1.3;
   }
 
   h1 {
     font-size: 1.4rem;
+    text-align: left;
+    margin-bottom: 0.2rem;
+  }
+
+  .root_folder button {
+    font-size: 0px;
+    &::after {
+      content: "✓";
+      font-size: 14px;
+    }
   }
 
   .composition {
     padding: 0.8rem;
+  }
+
+  .controls {
+    display: grid;
+    .sort {
+      width: 100%;
+      margin-bottom: 0.2rem;
+    }
+    .filter {
+      width: 100%;
+      margin-left: 0;
+      padding-left: 0
+    }
+  }
+
+  .refresh {
+    position:absolute;
+    top: 0;
+    right: 0;
+    display:inline;
+    padding: 1rem;
+    button {
+      font-size: 0px;
+      &::after {
+        content: "↻";
+        display:block;
+        font-size: 14px;
+      }
+    }
   }
 }
