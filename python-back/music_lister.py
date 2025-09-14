@@ -10,12 +10,15 @@ import socketserver
 import http.server
 import queue
 import urllib.parse
+import platform
 
 # DEFAULT GLOBAL PARAMETERS
 # Database export file
 DATABASE_FILE = None
 # Folder to search into for compositions
 COMPOSITIONS_FOLDER = "/mnt/c/Users/obrun/Music/Compositions"
+if(platform.system() == "Windows"):
+  COMPOSITIONS_FOLDER = "C:/Users/obrun/Music/Compositions"
 #####
 
 # Current script path
@@ -182,7 +185,7 @@ class MusicLister:
       self.look_for_als(next_path)
 
   def export_json(self):
-    print(f"Exporting JSON library to: {self.output_json_file}", flush=True)
+    log(f"Exporting JSON library to: {self.output_json_file}")
     file = open(self.output_json_file, 'w')
     file.write(self.__json__(python=False))
     file.close()
@@ -310,6 +313,11 @@ class Helpers:
         pass
     return (None, None)
 
+  @staticmethod
+  def log(message):
+    print(f"[{datetime.datetime.now()}] {message}", flush=True)
+
+log = Helpers.log
 
 class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
   """Handles a single GET request."""
@@ -319,7 +327,7 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
     urlparsed = urllib.parse.urlparse(self.path)
     command = urlparsed.path.lstrip('/')
     parameters = urllib.parse.parse_qs(urlparsed.query)
-    print(f"Received HTTP GET command: '{command}' with parameters: {parameters}", flush=True)
+    log(f"Received HTTP GET command: '{command}' with parameters: {parameters}")
 
     # Create event to sync between backend and HTTP thread
     no_timeout_event = threading.Event()
@@ -367,24 +375,24 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
     if not command:
       continue
 
-    print(f"Received data on HTTP server: '{command}' '{parameters}'", flush=True)
+    log(f"Received data on HTTP server: '{command}' '{parameters}'")
 
     try:
       command_valid = command in ["refresh"]
       if command_valid:
-        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), flush=True)
+        log(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
         if command == "refresh":
-          print("Scanning for compositions...", flush=True)
+          log("Scanning for compositions...")
           if "composition_folder" in parameters and parameters["composition_folder"][0]:
             new_potential_composition_folder = parameters["composition_folder"][0]
             if os.path.isdir(new_potential_composition_folder):
-              print(f"New compositions folder: {new_potential_composition_folder}", flush=True)
+              log(f"New compositions folder: {new_potential_composition_folder}")
               COMPOSITIONS_FOLDER = new_potential_composition_folder
             else:
-              print(f"Error: Path is invalid {new_potential_composition_folder}", flush=True)
+              log(f"Error: Path is invalid {new_potential_composition_folder}")
 
-          print(f"Will use: {COMPOSITIONS_FOLDER}", flush=True)
+          log(f"Will use: {COMPOSITIONS_FOLDER}")
 
           main_code(COMPOSITIONS_FOLDER, DATABASE_FILE)
 
@@ -392,7 +400,7 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
           success_event.set()
 
     except Exception as e:
-      print(f"Error during main code execution: {e}", flush=True)
+      log(f"Error during main code execution: {e}")
     finally:
       if no_timeout_event:
         no_timeout_event.set()
@@ -401,16 +409,18 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
 if __name__ == "__main__":
   if len(sys.argv) != 2:
-    print("Usage: python music_lister.py <database_file_path>", flush=True)
+    log("Usage: python music_lister.py <database_file_path>")
     sys.exit(1)
 
   DATABASE_FILE = sys.argv[1]
   if not os.path.isdir(os.path.dirname(DATABASE_FILE)):
-    print(f"Error: The directory for the database file does not exist: {os.path.dirname(DATABASE_FILE)}", flush=True)
+    log(f"Error: The directory for the database file does not exist: {os.path.dirname(DATABASE_FILE)}")
     sys.exit(1)
-  print(f"Using database file: {DATABASE_FILE}", flush=True)
 
-  print("Starting music_lister...", flush=True)
+  log(f"OS: {platform.system()}")
+  log(f"Using database file: {DATABASE_FILE}")
+
+  log("Starting music_lister...")
   # Create the HTTP server (no threading – we’ll drive it manually)
   httpd = socketserver.TCPServer((SOCKET_HOST, SOCKET_PORT), SimpleHTTPHandler, bind_and_activate=False)
   httpd.allow_reuse_address = True
@@ -421,7 +431,7 @@ if __name__ == "__main__":
 
   stop_flag = threading.Event()    
   main_thread = threading.Thread(target=main_thread, args=(stop_flag, httpd), daemon=True)
-  print(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT})", flush=True)
+  log(f"Program running on HTTP server ({SOCKET_HOST}:{SOCKET_PORT})")
   main_thread.start()
   
   server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
@@ -432,13 +442,13 @@ if __name__ == "__main__":
     while True:
       time.sleep(5)
       if not main_thread.is_alive():
-        print("Main thread has stopped unexpectedly. Stopping program.", flush=True)
+        log("Main thread has stopped unexpectedly. Stopping program.")
         break
   except KeyboardInterrupt:
-    print(f"\nStopping program… Please wait for completion (can take a few seconds)…", flush=True)
+    log(f"\nStopping program… Please wait for completion (can take a few seconds)…")
     stop_flag.set()
     main_thread.join()
     httpd.server_close()
     httpd.shutdown()
     server_thread.join
-  print("Program music_lister stopped.", flush=True)
+  log("Program music_lister stopped.")

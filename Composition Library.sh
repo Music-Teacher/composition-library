@@ -2,7 +2,7 @@ HOME=$PWD
 
 other_commands() {
   tput setaf 1
-  printf "\rSIGINT caught      "
+  printf "\rSIGINT caught"
   tput sgr0
   sleep 1
 
@@ -38,21 +38,16 @@ log_step() { echo -e "\n\e[42m# $*\e[0m\n"; }
 cd python-back
 log_step "Starting Python Backend"
 mkdir -p logs
-echo "Checking dependencies..."
-if [[ ! -d "venv" ]]; then
-  python -m venv venv
-fi
-source venv/bin/activate
-pip install -r requirements.txt
 python music_lister.py ../database/database.json > logs/music_lister.log 2>&1 &
 PYTHON_BACK_PID=$(echo $!)
-deactivate
 cd $HOME
 
 # Start backend
 cd back
 log_step "Starting Express Backend"
-npm install
+rm -rf node_modules
+npm i --package-lock-only --omit=dev
+npm ci --omit=dev
 mkdir -p logs
 node server.js > logs/express-backend.log 2>&1 &
 BACKEND_PID=$(echo $!)
@@ -61,7 +56,10 @@ cd $HOME
 # Start frontend
 cd front
 log_step "Starting Vue Frontend"
-npm install
+rm -rf node_modules
+npm i --package-lock-only --omit=dev
+npm ci --omit=dev
+mkdir -p logs
 npm run dev
 FRONTEND_PID=$(echo $!)
 cd $HOME

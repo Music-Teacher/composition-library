@@ -14,7 +14,6 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
-    "@rollup/rollup-win32-x64-msvc": "^4.50.1",
     "vue": "^3.5.18",
     "vue-router": "^4.5.1",
     "vuex": "^4.1.0",
@@ -29,5 +28,8 @@
     "globals": "^16.3.0",
     "prettier": "3.6.2",
     "vite-plugin-vue-devtools": "^8.0.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-win32-x64-msvc": "^4.50.1"
   }
 }
