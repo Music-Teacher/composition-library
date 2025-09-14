@@ -9,15 +9,15 @@ cd /d "%HOME%\python-back"
 echo.
 echo ### Starting Python Backend ###
 if not exist logs mkdir logs
-if not exist winvenv (
-    python -m venv winvenv
-)
-cmd /C windowsvenv\Scripts\activate.bat
-pip install -r requirements.txt
+@REM if not exist winvenv (
+@REM     python -m venv winvenv
+@REM )
+@REM cmd /C windowsvenv\Scripts\activate.bat
+@REM pip install -r requirements.txt
 cmd /c python music_lister.py ..\database\database.json > logs\music_lister.log 2>&1
 for /f "tokens=2" %%a in ('tasklist /fi "imagename eq python.exe" /fo list ^| findstr "PID:"') do set @PYTHON_BACK_PID=%%a
 ECHO %@PYTHON_BACK_PID%
-call windowsvenv\Scripts\deactivate.bat
+@REM call windowsvenv\Scripts\deactivate.bat
 cd /d "%HOME%"
 
 REM ========== Start Express Backend ==========
@@ -25,7 +25,9 @@ cd /d "%HOME%\back"
 echo.
 echo ### Starting Express Backend ###
 if not exist logs mkdir logs
-npm install --prefix win_node_modules
+if exist node_modules rmdir /s /q node_modules
+npm i --package-lock-only --omit=dev
+npm ci --omit=dev
 call node server.js > logs\express-backend.log 2>&1
 for /f "tokens=2" %%a in ('tasklist /fi "imagename eq node.exe" /fo list ^| findstr "PID:"') do set @BACKEND_PID=%%a
 echo %@BACKEND_PID%
@@ -35,9 +37,12 @@ REM ========== Start Vue Frontend ==========
 cd /d "%HOME%\front"
 echo.
 echo ### Starting Vue Frontend ###
-npm install --prefix win_node_modules
+rmdir /s /q node_modules
+npm i --package-lock-only --omit=dev
+npm ci --omit=dev
 call npm run dev
-for /f "tokens=2" %%a in ('tasklist /fi "imagename eq node.exe" /fo list ^| findstr "PID:"') do set FRONTEND_PID=%%a
+for /f "tokens=2" %%a in ('tasklist /fi "imagename eq node.exe" /fo list ^| findstr "PID:"') do set @FRONTEND_PID=%%a
+echo %@FRONTEND_PID%
 cd /d "%HOME%"
 
 @REM REM ========== Wait for CTRL+C ==========

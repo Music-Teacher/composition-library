@@ -226,7 +226,6 @@ __marimo__/
 
 **/package-lock.json
 **/node_modules
-**/win_node_modules
 **/.DS_Store
 **/dist
 **/dist-ssr
