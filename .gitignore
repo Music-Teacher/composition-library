@@ -224,7 +224,9 @@ __marimo__/
 **/pnpm-debug.log*
 **/lerna-debug.log*
 
+**/package-lock.json
 **/node_modules
+**/win_node_modules
 **/.DS_Store
 **/dist
 **/dist-ssr

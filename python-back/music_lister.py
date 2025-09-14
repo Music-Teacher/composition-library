@@ -98,7 +98,8 @@ class Composition:
     return self.als_file_path
 
   def __str__(self):
-    return_string = f"# {self.artist+" - " if self.artist else ""}{self.title}\n"
+    local_artist = f"{self.artist} - " if self.artist else ""
+    return_string = f"# {local_artist}{self.title}\n"
     return_string += f"Last activity: {self.last_activity}"
     if self.album:
       return_string += f"-- Album: {self.album}"
