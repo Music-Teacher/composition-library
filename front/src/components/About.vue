@@ -3,30 +3,35 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="lister_details menu_section">
-    <details>
+  <div class="lister_details menu_section" :class="{ 'no_root_folder': noRootFolder }">
+    <details :open="noRootFolder">
       <summary>About this library</summary>
       <ul>
+        <li v-if="noRootFolder" class="help_select_root_folder">
+          Please enter your composition folder below.
+        </li>
         <li class="root_folder">
-          Root folder:
+          <span>Composition folder: </span>
           <input
             type="text"
             :placeholder="rootFolder"
             v-model="localRootFolder"
             name="localRootFolder"
           />
-          <button @click="validateFolder" :disabled="localRootFolder === rootFolder">
+          <button @click="validateFolder" :disabled="!noRootFolder && localRootFolder === rootFolder">
             Validate
           </button>
         </li>
-        <li class="database_file">
+        <li v-if="!noRootFolder" class="database_file">
           Database file:
           <span class="text_information">{{ databaseFile }}</span>
         </li>
-        <li class="number_of_compositions">Number of compositions: {{ numberOfCompositions }}</li>
+        <li v-if="!noRootFolder" class="number_of_compositions">
+          Number of compositions: {{ numberOfCompositions }}
+        </li>
       </ul>
     </details>
-    <div class="refresh">
+    <div class="refresh" v-if="!noRootFolder">
       <button
         id="refreshButton"
         title="Press letter 'r' to refresh"
@@ -47,6 +52,11 @@ export default {
       localRootFolder: '',
     }
   },
+  computed: {
+    noRootFolder() {
+      return store.noRootFolder()
+    }
+  },
   async mounted() {
     await store.fetchAboutInfo()
     this.localRootFolder = this.rootFolder
@@ -60,11 +70,8 @@ export default {
       console.log('Validating folder:', this.localRootFolder)
       console.log('Previous folder:', this.rootFolder)
       store.rootFolder = this.localRootFolder
-      this.syncCompositions()
-    },
-    async syncCompositions() {
-      await store.refreshDatabase()
-      await store.fetchCompositions()
+      this.fetchAboutInfo()
+      store.refreshDatabaseAndFetchCompositions()
     },
     async onKeyUp(event) {
       if (event.key == 'r' && !store.isLoading) {

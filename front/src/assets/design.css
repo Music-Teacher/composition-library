@@ -111,6 +111,60 @@ details {
   border-bottom: 1px solid light-dark(#eee, #111);
   padding: 0.6rem 0;
 
+  &.no_root_folder {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    padding: 10% 0;
+    summary {
+      display: none;
+    }
+    ul {
+      width: 100%;
+      li {
+        width: 100%;
+        font-size: 1.3rem;
+        text-align: center;
+        input {
+          padding: 10px;
+          margin-right: 20px;
+          width: 75%;
+          font-size: 1.3rem;
+          margin-top: 20px;
+          border-radius: 3px;
+          border: none;
+          background-color: light-dark(#ccc, #666);
+        }
+        button {
+          width: 20%;
+          font-size: 1.3rem;
+          padding: 10px;
+          border: none;
+        }
+        &.help_select_root_folder {
+          padding: 10px;
+          font-size: 1.8rem;
+          color: light-dark(#fff, #fff);
+          background-color: light-dark(#0077ff, #0077ff);
+          border-radius: 4px;
+          &::before {
+            content: none;
+          }
+        }
+      }
+      .root_folder {
+        margin: auto;
+        width: 100%;
+        &:before {
+          content: "";
+        }
+        span {
+          display: none;
+        }
+      }
+    }
+  }
+
   details {
     display: inline-block;
     width: 80%;
@@ -129,14 +183,12 @@ details {
     .root_folder {
       &::before {
         content: '📁 ';
+        text-decoration: none;
       }
       input {
         padding: 1px 6px;
         width: 60%;
         margin-right: 0.3rem;
-      }
-      button:disabled {
-        display: none;
       }
     }
     .database_file {

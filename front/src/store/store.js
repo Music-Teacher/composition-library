@@ -62,4 +62,7 @@ export const store = reactive({
     const substring = text.substring(text.length - maxchars, text.length)
     return substring === text ? text : '...' + substring
   },
+  noRootFolder() {
+    return this.rootFolder === "" || this.rootFolder == null || this.rootFolder === undefined
+  }
 })
