@@ -23,7 +23,12 @@ PYTHON_BACKEND_URL = "localhost:5555"
 // Initialise database file
 var database;
 const read_database = () => {
-  database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
+  try {
+    database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
+  } catch (error) {
+    console.error(error);
+    log(error);
+  }
 };
 read_database();
 
