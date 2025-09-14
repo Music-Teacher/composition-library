@@ -16,9 +16,7 @@ import platform
 # Database export file
 DATABASE_FILE = None
 # Folder to search into for compositions
-COMPOSITIONS_FOLDER = "/mnt/c/Users/obrun/Music/Compositions"
-if(platform.system() == "Windows"):
-  COMPOSITIONS_FOLDER = "C:/Users/obrun/Music/Compositions"
+COMPOSITIONS_FOLDER = None
 #####
 
 # Current script path
@@ -358,8 +356,11 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
 
 # Main code
 def main_code(composition_folder, database_file):
-  ml = MusicLister(composition_folder, database_file)
-  ml.export_json()
+  if composition_folder:
+    ml = MusicLister(composition_folder, database_file)
+    ml.export_json()
+  else:
+    log("ERROR: No composition folder set yet.")
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 

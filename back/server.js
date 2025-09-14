@@ -26,6 +26,7 @@ const read_database = () => {
   try {
     database = JSON.parse(fs.readFileSync('../database/database.json', 'utf8'));
   } catch (error) {
+    log("Could not read database file");
     console.error(error);
     log(error);
   }
