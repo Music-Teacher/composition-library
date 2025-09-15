@@ -3,14 +3,15 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="lister_details menu_section" :class="{ 'no_root_folder': noRootFolder }">
-    <details :open="noRootFolder">
+  <div class="lister_details menu_section" :class="{ 'no_root_folder': noRootFolder,  'error': isRootFolderError}">
+    <details :open="noRootFolder || isRootFolderError">
       <summary>About this library</summary>
       <ul>
         <li v-if="noRootFolder" class="help_select_root_folder">
           Please enter your composition folder below.
         </li>
         <li class="root_folder">
+          <span v-if="isRootFolderError" title="Please review folder">⚠️ </span>
           <span>Composition folder: </span>
           <input
             type="text"
@@ -35,7 +36,7 @@ import { store } from '../store/store.js'
       <button
         id="refreshButton"
         title="Press letter 'r' to refresh"
-        @click="syncCompositions"
+        @click="store.refreshDatabaseAndFetchCompositions"
         :disabled="store.isLoading"
       >
         Refresh
@@ -55,11 +56,14 @@ export default {
   computed: {
     noRootFolder() {
       return store.noRootFolder()
+    },
+    isRootFolderError() {
+      return store.isRefreshDatabaseError()
     }
   },
   async mounted() {
     await store.fetchAboutInfo()
-    this.localRootFolder = this.rootFolder
+    this.localRootFolder = store.rootFolder
     document.addEventListener('keyup', this.onKeyUp)
   },
   beforeDestroy() {
@@ -68,10 +72,9 @@ export default {
   methods: {
     async validateFolder(event) {
       console.log('Validating folder:', this.localRootFolder)
-      console.log('Previous folder:', this.rootFolder)
+      console.log('Previous folder:', store.rootFolder)
       store.rootFolder = this.localRootFolder
-      this.fetchAboutInfo()
-      store.refreshDatabaseAndFetchCompositions()
+      await store.refreshDatabaseAndFetchCompositions()
     },
     async onKeyUp(event) {
       if (event.key == 'r' && !store.isLoading) {

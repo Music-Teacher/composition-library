@@ -5,9 +5,11 @@ export const store = reactive({
   databaseFile: '',
   compositions: [],
   isLoading: false,
-  error: null,
+  refreshDatabaseError: null,
+  backendError: null,
   serverUrl: 'http://localhost:5556',
   async fetchCompositions() {
+    this.isLoading = true
     console.log('Fetching compositions...')
     try {
       const response = await fetch(this.serverUrl + '/compositions')
@@ -16,10 +18,12 @@ export const store = reactive({
       }
       const data = await response.json()
       this.compositions = data // Assuming the API returns an array of IDs
-    } catch (error) {
-      console.error('Error fetching composition IDs:', error)
+      this.backendError = null
+      console.log('Compositions fetched.')
+    } catch (backendError) {
+      console.error('Error fetching composition IDs:', backendError)
+      this.backendError = 'Error fetching composition IDs: ' + backendError
     }
-    console.log('Compositions fetched.')
     this.isLoading = false
   },
   async refreshDatabase() {
@@ -29,27 +33,39 @@ export const store = reactive({
       const param = 'composition_folder=' + encodeURIComponent(this.rootFolder)
       const response = await fetch(this.serverUrl + '/refresh_database?' + param)
       if (!response.ok) {
-        throw new Error('Failed to fetch composition IDs')
+        throw new Error('Failed to refresh database')
       }
-      const data = await response.json()
-    } catch (error) {
-      console.error('Error fetching composition IDs:', error)
+      await response.json()
+      this.backendError = null
+      this.refreshDatabaseError = null
+      console.log('Database refreshed.')
+    } catch (backendError) {
+      console.error('Error refreshing database:', backendError)
+      this.backendError = 'Error refreshing database: ' + backendError
+      this.refreshDatabaseError = 'Failed to refresh database'
     }
-    console.log('Database refreshed.')
     this.isLoading = false
   },
   async fetchAboutInfo() {
+    this.isLoading = true
     try {
       const response = await fetch(this.serverUrl + '/basicinfo')
       if (!response.ok) {
-        throw new Error('Failed to fetch basic info')
+        throw new Error('Failed to fetch about info')
       }
       const data = await response.json()
-      this.rootFolder = data.root_folder
+      if(this.noRootFolder()) {
+        this.rootFolder = data.root_folder
+        console.log("Fetched root folder", data.root_folder)
+      }
       this.databaseFile = data.output_json_file
-    } catch (error) {
-      console.error('Error fetching composition IDs:', error)
+      this.backendError = null
+      console.log('About info fetched.')
+    } catch (backendError) {
+      console.error('Error fetching about info:', backendError)
+      this.backendError = 'Error fetching about info: ' + backendError
     }
+    this.isLoading = false
   },
   async refreshDatabaseAndFetchCompositions() {
     await this.refreshDatabase()
@@ -64,5 +80,8 @@ export const store = reactive({
   },
   noRootFolder() {
     return this.rootFolder === "" || this.rootFolder == null || this.rootFolder === undefined
+  },
+  isRefreshDatabaseError() {
+    return this.refreshDatabaseError !== null
   }
 })

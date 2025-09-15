@@ -390,15 +390,17 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
             if os.path.isdir(new_potential_composition_folder):
               log(f"New compositions folder: {new_potential_composition_folder}")
               COMPOSITIONS_FOLDER = new_potential_composition_folder
+              if success_event:
+                success_event.set()
             else:
               log(f"Error: Path is invalid {new_potential_composition_folder}")
+          else:
+            if success_event:
+              success_event.set()
 
           log(f"Will use: {COMPOSITIONS_FOLDER}")
 
           main_code(COMPOSITIONS_FOLDER, DATABASE_FILE)
-
-        if success_event:
-          success_event.set()
 
     except Exception as e:
       log(f"Error during main code execution: {e}")
