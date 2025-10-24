@@ -5,11 +5,14 @@ import { store } from '../store/store.js'
 <template>
   <div class="composition" :class="{ finished: project_finished, unfinished: !project_finished }">
     <div class="coverart" v-if="!!composition.coverart">
-      <img :src="cover_art_source(composition.coverart)" />
+      <img :src="cover_art_source(composition.coverart)" alt="Cover Art" title="Cover Art" loading="lazy" />
     </div>
     <h2 class="songname">{{ composition.title }}</h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
-    <h3 class="album">Album: {{ composition.album }}</h3>
+    <h3 class="album">
+      <span v-if="composition.album">Album: {{ composition.album }}</span>
+      <span v-else-if="project_finished">Single</span>
+    </h3>
     <p class="status" v-if="project_finished && !composition.coverart">{{ composition.status }}</p>
     <p
       class="rework"

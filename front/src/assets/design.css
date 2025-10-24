@@ -337,7 +337,7 @@ details {
       margin-bottom: 0.3rem;
       word-break: break-word;
     }
-    .album::before {
+    .album span::before {
       content: '💿 ';
     }
     .ep::before {
