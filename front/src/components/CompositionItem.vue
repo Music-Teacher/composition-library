@@ -50,7 +50,7 @@ import { store } from '../store/store.js'
         <tbody>
           <tr>
             <th>Lyrics</th>
-            <td>{{ composition.lyrics }}</td>
+            <td>{{ lyrics }}</td>
           </tr>
           <tr>
             <th>Chords</th>
@@ -126,6 +126,9 @@ export default {
     },
     pretty_last_activity() {
       return new Date(this.composition.last_activity).toDateString()
+    },
+    lyrics() {
+      return this.composition.lyrics || 'N/A'
     },
   },
   methods: {
