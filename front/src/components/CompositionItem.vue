@@ -128,7 +128,7 @@ export default {
       return new Date(this.composition.last_activity).toDateString()
     },
     lyrics() {
-      return this.composition.lyrics || 'N/A'
+      return this.project_finished ? (this.composition.lyrics || 'N/A') : (this.composition.lyrics)
     },
   },
   methods: {
