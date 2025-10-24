@@ -4,10 +4,13 @@ import { store } from '../store/store.js'
 
 <template>
   <div class="composition" :class="{ finished: project_finished, unfinished: !project_finished }">
+    <div class="coverart" v-if="!!composition.coverart">
+      <img :src="cover_art_source(composition.coverart)" />
+    </div>
     <h2 class="songname">{{ composition.title }}</h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
     <h3 class="album">Album: {{ composition.album }}</h3>
-    <p class="status" v-if="project_finished">{{ composition.status }}</p>
+    <p class="status" v-if="project_finished && !composition.coverart">{{ composition.status }}</p>
     <p
       class="rework"
       :class="{ rework_multiple_lines: !!rework_multiple_lines }"
@@ -141,6 +144,9 @@ export default {
     },
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)
+    },
+    cover_art_source(cover_art_path) {
+      return store.getCoverArt(cover_art_path)
     },
   },
 }

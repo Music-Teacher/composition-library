@@ -3,6 +3,7 @@ const cors = require('cors');
 const request = require('postman-request');
 const moment = require('moment');
 const fs = require('fs');
+const sharp = require('sharp');
 const os = require('node:os');
 const _ = require('lodash')
 
@@ -75,7 +76,7 @@ app.get('/compositions', (req, res) => {
   log("Compositions returned")
 })
 
-app.get('/audiostream', (req, res) => {
+app.get('/audiostream', (req, res) => { // /audiostream?file=full_audio_path
   log("Looking for audio stream")
   if(!req.query.file) {
     res.status(500).send('No file provided');
@@ -90,6 +91,29 @@ app.get('/audiostream', (req, res) => {
   }
   res.sendFile(full_audio_path);
   log("Audio returned")
+})
+
+app.get('/coverart', (req, res) => { // /coverart?file=full_cover_art_path
+  log("Looking for cover art")
+  if(!req.query.file) {
+    res.status(500).send('No file provided');
+    log("No file provided")
+  }
+  const full_cover_art_path = decodeURIComponent(req.query.file)
+  log("Full cover art path: " + full_cover_art_path);
+
+  if(!fs.existsSync(full_cover_art_path)) {
+    res.status(404).send('Cover art file not found');
+    log("Cover art file not found")
+    return;
+  }
+
+  sharp(full_cover_art_path)
+      .resize(150, 150)
+      .png()
+      .toBuffer()
+      .then(data => res.type('png').send(data))
+  log("Cover art returned")
 })
 
 app.listen(port, () => {

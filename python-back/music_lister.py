@@ -49,6 +49,8 @@ class Composition:
   audio_files = None
   last_activity = None
 
+  coverart = None
+
   def __init__(self, als_file_path, root_folder=None):
     self.als_file_path = als_file_path
     self.root_folder = root_folder
@@ -66,6 +68,7 @@ class Composition:
     self.extra_info = None
     self.status = None
     self.rework = None
+    self.coverart = None
     self.gather_composition_information()
 
   def gather_composition_information(self):
@@ -89,6 +92,7 @@ class Composition:
     else:
       self.rework = self.status
       self.status = "In Progress"
+    self.coverart = Helpers.get_coverart(self.als_file_path, self.title, self.artist)
   
   def is_finished(self):
     return self.status == "Finished"
@@ -140,6 +144,7 @@ class Composition:
     j["als_file_name"] = self.als_file_name
     j["audio_files"] = self.audio_files
     j["audio"] = (self.audio_files != None and len(self.audio_files) > 0)
+    j["coverart"] = self.coverart
     j["last_activity"] = self.last_activity
 
     if python:
@@ -240,17 +245,16 @@ class Helpers:
     return False
 
   @staticmethod
-  def get_info_file_related_to_als(path):
-    file_path = path.replace(".als", ".txt")
+  def get_info_file_related_to_als(als_file_path):
+    file_path = als_file_path.replace(".als", ".txt")
     if os.path.isfile(file_path):
       return file_path
     return None
   
   @staticmethod
-  def is_audio_file(file_path):
+  def is_expected_file(file_path, list_of_extensions):
     if not os.path.isfile(file_path):
       return False
-    list_of_extensions = ["mp3", "wav", "ogg"]
     file_name = os.path.basename(file_path)
     if '.' in file_name and file_name.split('.')[-1] in list_of_extensions:
       return True
@@ -264,9 +268,20 @@ class Helpers:
     files.sort(key=lambda x: os.path.getmtime(x))
     files.reverse()
     for file in files:
-      if Helpers.is_audio_file(file):
+      if Helpers.is_expected_file(file, ["mp3", "wav", "ogg"]):
         audio_files.append(os.path.join(als_dir, file))
     return audio_files
+
+  @staticmethod
+  def get_coverart(als_file_path, title=None, artist=None):
+    als_dir = os.path.dirname(als_file_path)
+    files = list(filter(os.path.isfile, glob.glob(als_dir + "/*")))
+    files.sort(key=lambda x: os.path.getmtime(x))
+    files.reverse()
+    for file in files:
+      if Helpers.is_expected_file(file, ["jpg", "jpeg", "png"]):
+        return file
+    return None
 
   @staticmethod
   def get_fields_from_file(path):
