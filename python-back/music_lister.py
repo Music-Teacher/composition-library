@@ -139,6 +139,7 @@ class Composition:
     j["root_folder"] = self.root_folder
     j["als_file_name"] = self.als_file_name
     j["audio_files"] = self.audio_files
+    j["audio"] = (self.audio_files != None and len(self.audio_files) > 0)
     j["last_activity"] = self.last_activity
 
     if python:

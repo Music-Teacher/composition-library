@@ -21,14 +21,23 @@ import CompositionItem from './CompositionItem.vue'
     </div>
     <div class="filters">
       <div class="filter" v-for="(information, filter) in filtersAvailable">
-        <span>{{ filter[0].toUpperCase() + filter.slice(1) }}: </span>
+        <span v-if="information[0].length >= 2">
+          {{ filter[0].toUpperCase() + filter.slice(1) }}: 
+        </span>
         <label v-for="value in information[0]">
-          <input
+          <!-- Distinguish between filters with one value and others with several values -->
+          <input v-if="information[0].length >= 2"
             v-model="filtersSelected[make_filter_index(filter, value)]"
             @change="toggleFilter(filter, value, information[1])"
             type="checkbox"
           />
-          <span>{{ value }}</span>
+          <input v-else-if="information[0].length == 1" 
+            v-model="filtersSelected[filter]"
+            @change="toggleFilter(filter, value, information[1])"
+            type="checkbox"
+          />
+          <span v-if="information[0].length >= 2">{{ value }}</span>
+          <span v-else-if="information[0].length == 1">{{ filter[0].toUpperCase() + filter.slice(1) }}</span>
         </label>
       </div>
     </div>
@@ -49,15 +58,18 @@ export default {
       filtersSelected: {},
       onlyFinished: false,
       onlyInProgress: false,
+      onlyExportedSongs: false,
     }
   },
   computed: {
     filtersAvailable() {
-      const filters = ['status', 'artist', 'album', 'ep']
+      const filters = ['audio', 'status', 'artist', 'album', 'ep']
       let filtersAvailable = {}
       filters.forEach((filter) => {
         const filterValues = this.uniqueFilterArray(filter)
-        if (filterValues.length >= 2) {
+        if (filterValues.length == 1 && filterValues[0] === true) {
+          filtersAvailable[filter] = [filterValues]
+        } else if (filterValues.length >= 2) {
           const exclusive = filterValues.length == 2 ? true : false
           filtersAvailable[filter] = [filterValues, exclusive]
         }
@@ -76,7 +88,7 @@ export default {
           const filterName = filter.split(':')[0]
           const filterValue = filter.split(':')[1]
           if (!!this.filtersSelected[filter]) {
-            if (c[filterName] === filterValue) {
+            if (c[filterName] === filterValue || (!filterValue && c[filterName] === this.filtersSelected[filter])) {
               categoryMatch[filterName] = true
               continue
             }
@@ -142,6 +154,10 @@ export default {
     },
     filterInProgress() {
       this.onlyFinished = false
+      this.$forceUpdate()
+    },
+    filterExportedSongs() {
+      this.onlyExportedSongs = false
       this.$forceUpdate()
     },
     uniqueFilterArray(key) {
