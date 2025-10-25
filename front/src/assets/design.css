@@ -327,7 +327,7 @@ details {
         color: light-dark(#2ecc71, #09a94c);
       }
     }
-    .songname {
+    .title {
       font-size: 1.1rem;
       margin-bottom: 0.3rem;
       word-break: break-word;
