@@ -7,7 +7,7 @@ import { store } from '../store/store.js'
     <div class="coverart" v-if="!!composition.coverart">
       <img :src="cover_art_source(composition.coverart)" alt="Cover Art" title="Cover Art" loading="lazy" />
     </div>
-    <h2 class="title">{{ composition.title }}</h2>
+    <h2 class="title">{{ title }}</h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
     <h3 class="album">
       <span v-if="composition.album">Album: {{ composition.album }}</span>
@@ -42,13 +42,16 @@ import { store } from '../store/store.js'
           short_main_audio_file_name
         }}</span>
       </p>
-      <p v-else class="audio_file" :class="{ not_exported: project_finished }">
-        Sound file not exported
-      </p>
       <p v-if="has_main_audio_file" class="audio_source">
         <audio controls>
           <source :src="main_audio_file_source" :type="'audio/' + main_audio_extension" />
         </audio>
+      </p>
+      <p v-if="project_finished && !has_main_audio_file" class="audio_file" :class="{ not_exported: project_finished }">
+        Sound file not exported
+      </p>
+      <p v-if="!composition.info_file" class="no_info_file">
+        Info file missing. <button @click="store.createInfoFile(composition.full_als_file_path)">Create?</button>
       </p>
     </div>
     <details class="composition_details">
@@ -136,6 +139,9 @@ export default {
     },
     lyrics() {
       return this.project_finished ? (this.composition.lyrics || 'N/A') : (this.composition.lyrics)
+    },
+    title() {
+      return this.composition.title || this.composition.als_file_name
     },
   },
   methods: {

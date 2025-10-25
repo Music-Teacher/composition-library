@@ -116,6 +116,34 @@ app.get('/coverart', (req, res) => { // /coverart?file=full_cover_art_path
   log("Cover art returned")
 })
 
+app.get('/create_info_file', (req, res) => { // /create_info_file?als_file_path=full_als_file_path
+  log("Looking to create info file")
+  if(!req.query.als_file_path) {
+    res.status(500).send('No ALS file path provided');
+    log("No ALS file path provided")
+  }
+  const als_file_path = decodeURIComponent(req.query.als_file_path)
+  log("Full ALS file path: " + als_file_path);
+
+  request('http://' + PYTHON_BACKEND_URL + '/create_info_file?als_file_path=' + encodeURIComponent(als_file_path), function (error, response, body) {
+    if (error) {
+      console.error('Error making request to Python Backend:', error);
+      res.status(500).send('Error making request to Python Backend');
+      log("Error making request to Python Backend: "+ error)
+      return;
+    }
+    if (response.statusCode !== 200) {
+      console.error('Non-200 response status code:', response.statusCode);
+      res.status(response.statusCode).send('Non-200 response status code');
+      log("Non-200 response status code: " + response.statusCode)
+      return;
+    }
+    res.send(response);
+    read_database();
+    log("Info file created and database updated")
+  });
+})
+
 app.listen(port, () => {
   log(`Backend listening on port ${port}`)
 })

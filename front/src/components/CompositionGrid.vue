@@ -63,7 +63,7 @@ export default {
   },
   computed: {
     filtersAvailable() {
-      const filters = ['audio', 'status', 'artist', 'album', 'ep']
+      const filters = ['status', 'audio', 'artist', 'album', 'ep']
       let filtersAvailable = {}
       filters.forEach((filter) => {
         const filterValues = this.uniqueFilterArray(filter)

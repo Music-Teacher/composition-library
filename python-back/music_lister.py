@@ -28,6 +28,18 @@ JS_FILE_PATH=os.path.join(CURRENT_SCRIPT_PATH, "sortfilter.js")
 SOCKET_HOST = "localhost"
 SOCKET_PORT = 5555
 
+# Info file fields
+INFO_FILE_FIELDS = [
+  "title",
+  "artist",
+  "album",
+  "ep",
+  "lyrics",
+  "chords",
+  "extra_info",
+  "status"
+]
+
 class Composition:
   """This class will hold the composition information.
   It will look for an info file on disk, based on the ALS file path given."""
@@ -41,6 +53,8 @@ class Composition:
   chords = None
   extra_info = None
   status = None
+
+  # Data derived from status
   rework = None
 
   # Data from the ALS file path
@@ -73,14 +87,13 @@ class Composition:
     self.extra_info = None
     self.status = None
     self.rework = None
-    self.coverart = None
 
     self.gather_composition_information()
 
   def gather_composition_information(self):
     info = Helpers.get_fields_from_file(self.info_file_path) if self.info_file_path else dict()
 
-    self.title = info.get("title", self.als_file_name)
+    self.title = info.get("title", None)
     self.artist = info.get("artist", None)
     self.album = info.get("album", None)
     self.ep = info.get("ep", None)
@@ -88,16 +101,14 @@ class Composition:
     self.extra_info = info.get("extra_info", None)
     self.chords = info.get("chords", None)
     self.status = info.get("status", None)
-    self.make_proper_info()
-  
-  def make_proper_info(self):
+
     if self.status and Helpers.is_status_complete(self.status):
-      self.status = "Finished"
       self.rework = None
+      self.status = "Finished"
     else:
       self.rework = self.status
       self.status = "In Progress"
-  
+    
   def is_finished(self):
     return self.status == "Finished"
 
@@ -143,6 +154,7 @@ class Composition:
     j["rework"] = self.rework
 
     j["als_file_path"] = self.getShortenedFilePath()
+    j["full_als_file_path"] = self.als_file_path
     j["info_file"] = True if self.info_file_path else False
     j["project_dir"] = self.project_dir
     j["root_folder"] = self.root_folder
@@ -375,13 +387,25 @@ class SimpleHTTPHandler(http.server.BaseHTTPRequestHandler):
       self.wfile.write(b"REQUEST TIMEOUT\n")
 
 
-# Main code
-def main_code(composition_folder, database_file):
+# Refresh database
+def refresh_database(composition_folder, database_file):
   if composition_folder:
     ml = MusicLister(composition_folder, database_file)
     ml.export_json()
   else:
     log("ERROR: No composition folder set yet.")
+
+# Create info file
+def create_info_file(als_file_path):
+  info_file_path = Helpers.get_info_file_related_to_als(als_file_path)
+  if not info_file_path:
+    info_file_path = als_file_path.replace(".als", ".txt")
+    with open(info_file_path, 'w') as info_file:
+      for field in INFO_FILE_FIELDS:
+        info_file.write(f"{field}: \n")
+    log(f"Info file created: {info_file_path}")
+  else:
+    log(f"Info file already exists: {info_file_path}")
 
 def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
@@ -400,7 +424,7 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
     log(f"Received data on HTTP server: '{command}' '{parameters}'")
 
     try:
-      command_valid = command in ["refresh"]
+      command_valid = command in ["refresh", "create_info_file"]
       if command_valid:
         log(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
 
@@ -421,7 +445,16 @@ def main_thread(stop_event: threading.Event, httpd: socketserver.TCPServer):
 
           log(f"Will use: {COMPOSITIONS_FOLDER}")
 
-          main_code(COMPOSITIONS_FOLDER, DATABASE_FILE)
+          refresh_database(COMPOSITIONS_FOLDER, DATABASE_FILE)
+
+        elif command == "create_info_file":
+          if "als_file_path" in parameters and parameters["als_file_path"][0]:
+            als_file_path = parameters["als_file_path"][0]
+            create_info_file(als_file_path)
+            if success_event:
+              success_event.set()
+          else:
+            log("Error: No ALS file path provided.")
 
     except Exception as e:
       log(f"Error during main code execution: {e}")
