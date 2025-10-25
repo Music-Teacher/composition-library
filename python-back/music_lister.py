@@ -263,10 +263,14 @@ class Helpers:
 
   @staticmethod
   def get_info_file_related_to_als(als_file_path):
-    file_path = als_file_path.replace(".als", ".txt")
+    file_path = Helpers.get_info_file_name_from_als(als_file_path)
     if os.path.isfile(file_path):
       return file_path
     return None
+
+  @staticmethod
+  def get_info_file_name_from_als(als_file_path):
+    return als_file_path.replace(".als", ".txt")
   
   @staticmethod
   def is_expected_file(file_path, list_of_extensions):
@@ -305,24 +309,24 @@ class Helpers:
     fields = dict()
 
     # Function to save field
-    def save_field(filed_name, field_value):
+    def save_field(field_name, field_value):
       if field_name and field_value:
         fields[field_name.strip()] = field_value.strip()
 
     with open(path) as file:
-      field_name = None
-      field_value = None
+      field_name = field_value = None
       for line in file:
         line = line.strip()
         try:
           key, value = line.split(':', 1)
-          save_field(field_name, field_value)
-          field_name = key
-          field_value = value
         except:
-          if field_name:
+          key = value = None
+        if key and key.lower().strip() in INFO_FILE_FIELDS:
+            save_field(field_name, field_value)
+            field_name = key
+            field_value = value
+        elif field_name:
             field_value += f"\n{line}"
-          pass
       save_field(field_name, field_value)
     return fields
 
@@ -399,7 +403,7 @@ def refresh_database(composition_folder, database_file):
 def create_info_file(als_file_path):
   info_file_path = Helpers.get_info_file_related_to_als(als_file_path)
   if not info_file_path:
-    info_file_path = als_file_path.replace(".als", ".txt")
+    info_file_path = Helpers.get_info_file_name_from_als(als_file_path)
     with open(info_file_path, 'w') as info_file:
       for field in INFO_FILE_FIELDS:
         info_file.write(f"{field}: \n")
