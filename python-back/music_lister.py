@@ -32,6 +32,7 @@ class Composition:
   """This class will hold the composition information.
   It will look for an info file on disk, based on the ALS file path given."""
 
+  # Data from the info file
   title = None
   artist = None
   album = None
@@ -42,13 +43,14 @@ class Composition:
   status = None
   rework = None
 
+  # Data from the ALS file path
   als_file_path = None
-  project_dir = None
   root_folder = None
+  project_dir = None
   als_file_name = None
-  audio_files = None
+  info_file_path = None
   last_activity = None
-
+  audio_files = None
   coverart = None
 
   def __init__(self, als_file_path, root_folder=None):
@@ -56,9 +58,12 @@ class Composition:
     self.root_folder = root_folder
     self.project_dir = os.path.dirname(als_file_path)
     self.als_file_name = os.path.basename(als_file_path)
+    self.info_file_path = Helpers.get_info_file_related_to_als(self.als_file_path)
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
     self.audio_files = Helpers.get_audio_files_related_to_als(self.als_file_path)
+    self.coverart = Helpers.get_coverart(self.als_file_path, self.title, self.artist)
+
     self.title = None
     self.artist = None
     self.album = None
@@ -69,20 +74,20 @@ class Composition:
     self.status = None
     self.rework = None
     self.coverart = None
+
     self.gather_composition_information()
 
   def gather_composition_information(self):
-    info_file_path = Helpers.get_info_file_related_to_als(self.als_file_path)
-    if info_file_path:
-      info = Helpers.get_fields_from_file(info_file_path)
-      self.title = info.get("title", self.als_file_name) or self.als_file_name
-      self.artist = info.get("artist", None) or None
-      self.album = info.get("album", None) or None
-      self.ep = info.get("ep", None) or None
-      self.lyrics = info.get("lyrics", None) or None
-      self.extra_info = info.get("extra_info", None) or None
-      self.chords = info.get("chords", None) or None
-      self.status = info.get("status", None) or None
+    info = Helpers.get_fields_from_file(self.info_file_path) if self.info_file_path else dict()
+
+    self.title = info.get("title", self.als_file_name)
+    self.artist = info.get("artist", None)
+    self.album = info.get("album", None)
+    self.ep = info.get("ep", None)
+    self.lyrics = info.get("lyrics", None)
+    self.extra_info = info.get("extra_info", None)
+    self.chords = info.get("chords", None)
+    self.status = info.get("status", None)
     self.make_proper_info()
   
   def make_proper_info(self):
@@ -92,7 +97,6 @@ class Composition:
     else:
       self.rework = self.status
       self.status = "In Progress"
-    self.coverart = Helpers.get_coverart(self.als_file_path, self.title, self.artist)
   
   def is_finished(self):
     return self.status == "Finished"
@@ -139,6 +143,7 @@ class Composition:
     j["rework"] = self.rework
 
     j["als_file_path"] = self.getShortenedFilePath()
+    j["info_file"] = True if self.info_file_path else False
     j["project_dir"] = self.project_dir
     j["root_folder"] = self.root_folder
     j["als_file_name"] = self.als_file_name
