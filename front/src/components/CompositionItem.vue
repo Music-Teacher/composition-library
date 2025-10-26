@@ -4,8 +4,8 @@ import { store } from '../store/store.js'
 
 <template>
   <div class="composition" :class="{ finished: project_finished, unfinished: !project_finished }">
-    <div class="coverart" v-if="!!composition.coverart">
-      <img :src="cover_art_source(composition.coverart)" alt="Cover Art" title="Cover Art" loading="lazy" />
+    <div class="cover_art" v-if="!!composition.cover_art">
+      <img :src="cover_art_source" alt="Cover Art" title="Cover Art" loading="lazy" />
     </div>
     <h2 class="title">{{ title }}</h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
@@ -14,7 +14,7 @@ import { store } from '../store/store.js'
       <span v-else-if="composition.ep">EP: {{ composition.ep }}</span>
       <span v-else-if="project_finished">Single</span>
     </h3>
-    <p class="status" v-if="project_finished && !composition.coverart">{{ composition.status }}</p>
+    <p class="status" v-if="project_finished && !composition.cover_art">{{ composition.status }}</p>
     <p
       class="rework"
       :class="{ rework_multiple_lines: !!rework_multiple_lines }"
@@ -43,15 +43,24 @@ import { store } from '../store/store.js'
         }}</span>
       </p>
       <p v-if="has_main_audio_file" class="audio_source">
-        <audio controls>
-          <source :src="main_audio_file_source" :type="'audio/' + main_audio_extension" />
-        </audio>
+        <a
+          href="#"
+          class="play_this_audio"
+          @click.prevent="play_this_audio(this.composition.audio_files[0])"
+        >
+          Play this audio
+        </a>
       </p>
-      <p v-if="project_finished && !has_main_audio_file" class="audio_file" :class="{ not_exported: project_finished }">
+      <p
+        v-if="project_finished && !has_main_audio_file"
+        class="audio_file"
+        :class="{ not_exported: project_finished }"
+      >
         Sound file not exported
       </p>
       <p v-if="!composition.info_file" class="no_info_file">
-        Info file missing. <button @click="store.createInfoFile(composition.full_als_file_path)">Create?</button>
+        Info file missing.
+        <button @click="store.createInfoFile(composition.full_als_file_path)">Create?</button>
       </p>
     </div>
     <details class="composition_details">
@@ -71,12 +80,9 @@ import { store } from '../store/store.js'
             <td>
               <p v-for="audio_file in other_audio_files" class="audio_source">
                 {{ audio_file_name(audio_file) }}<br />
-                <audio controls controlslist="play nofullscreen nodownload noplaybackrate">
-                  <source
-                    :src="audio_file_source(audio_file)"
-                    :type="'audio/' + audio_extension(audio_file)"
-                  />
-                </audio>
+                <a href="#" class="play_this_audio" @click.prevent="play_this_audio(audio_file)">
+                  Play this audio
+                </a>
               </p>
             </td>
           </tr>
@@ -138,10 +144,31 @@ export default {
       return new Date(this.composition.last_activity).toDateString()
     },
     lyrics() {
-      return this.project_finished ? (this.composition.lyrics || 'N/A') : (this.composition.lyrics)
+      return this.project_finished ? this.composition.lyrics || 'N/A' : this.composition.lyrics
     },
     title() {
       return this.composition.title || this.composition.als_file_name
+    },
+    artist() {
+      return this.composition.artist || null
+    },
+    pretty_title() {
+      let pretty_title = ''
+      if (this.composition.artist) {
+        pretty_title += this.composition.artist + ' - '
+      }
+      if (this.composition.title) {
+        pretty_title += this.composition.title
+      } else {
+        pretty_title += this.composition.als_file_name
+      }
+      return pretty_title
+    },
+    cover_art_source() {
+      if (this.composition.cover_art) {
+        return store.getCoverArt(this.composition.cover_art)
+      }
+      return null
     },
   },
   methods: {
@@ -155,8 +182,14 @@ export default {
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)
     },
-    cover_art_source(cover_art_path) {
-      return store.getCoverArt(cover_art_path)
+    play_this_audio(audio_file) {
+      store.setAudioToPlay(
+        this.audio_file_source(audio_file),
+        this.artist,
+        this.title,
+        this.audio_extension(audio_file),
+        this.cover_art_source,
+      )
     },
   },
 }

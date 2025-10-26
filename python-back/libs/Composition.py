@@ -33,7 +33,7 @@ class Composition:
   info_file_path = None
   last_activity = None
   audio_files = None
-  coverart = None
+  cover_art = None
 
   @staticmethod
   def get_info_file_fields():
@@ -57,7 +57,7 @@ class Composition:
     modification_time = datetime.datetime.fromtimestamp(os.path.getmtime(als_file_path))
     self.last_activity = modification_time.strftime("%Y-%m-%d %H:%M")
     self.audio_files = Helpers.get_audio_files_related_to_als(self.als_file_path)
-    self.coverart = Helpers.get_coverart(self.als_file_path)
+    self.cover_art = Helpers.get_cover_art(self.als_file_path)
 
     self.title = None
     self.artist = None
@@ -142,7 +142,7 @@ class Composition:
     j["als_file_name"] = self.als_file_name
     j["audio_files"] = self.audio_files
     j["audio"] = (self.audio_files != None and len(self.audio_files) > 0)
-    j["coverart"] = self.coverart
+    j["cover_art"] = self.cover_art
     j["last_activity"] = self.last_activity
 
     if python:

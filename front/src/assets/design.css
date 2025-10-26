@@ -156,7 +156,7 @@ details {
         margin: auto;
         width: 100%;
         &:before {
-          content: "";
+          content: '';
         }
         span {
           display: none;
@@ -382,11 +382,20 @@ details {
           font-weight: 600;
           padding: 1px 3px;
           border-radius: 0%;
-          background-color: rgba(255,0,0,0.7);
+          background-color: rgba(255, 0, 0, 0.7);
           box-shadow: none;
           text-decoration: underline;
           border: none;
         }
+      }
+    }
+
+    .play_this_audio {
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+      &::before {
+        content: '▶️ ';
       }
     }
 
@@ -404,7 +413,7 @@ details {
       z-index: 0;
     }
 
-    .coverart {
+    .cover_art {
       float: right;
       margin-right: -0.5rem;
       margin-top: -0.5rem;
@@ -534,6 +543,51 @@ details {
         display: block;
         font-size: 2rem;
       }
+    }
+  }
+}
+
+.audio_player_container {
+  display: inline;
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: light-dark(#fff, #111);
+  border: 1px solid light-dark(#ccc, #444);
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 4px 12px light-dark(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.8));
+
+  div {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .audio_player_cover_art {
+    margin-right: 1rem;
+    img {
+      height: 50px;
+      width: auto;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .audio_information {
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 1rem;
+
+    .audio_player_title {
+      font-size: 0.9rem;
+      color: light-dark(#000, #fff);
+      display: block;
+    }
+
+    .audio_player_artist_album {
+      font-size: 0.9rem;
+      color: light-dark(#555, #aaa);
+      display: block;
     }
   }
 }

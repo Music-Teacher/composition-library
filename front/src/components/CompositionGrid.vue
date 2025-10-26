@@ -22,22 +22,26 @@ import CompositionItem from './CompositionItem.vue'
     <div class="filters">
       <div class="filter" v-for="(information, filter) in filtersAvailable">
         <span v-if="information[0].length >= 2">
-          {{ filter[0].toUpperCase() + filter.slice(1) }}: 
+          {{ filter[0].toUpperCase() + filter.slice(1) }}:
         </span>
         <label v-for="value in information[0]">
           <!-- Distinguish between filters with one value and others with several values -->
-          <input v-if="information[0].length >= 2"
+          <input
+            v-if="information[0].length >= 2"
             v-model="filtersSelected[make_filter_index(filter, value)]"
             @change="toggleFilter(filter, value, information[1])"
             type="checkbox"
           />
-          <input v-else-if="information[0].length == 1" 
+          <input
+            v-else-if="information[0].length == 1"
             v-model="filtersSelected[filter]"
             @change="toggleFilter(filter, value, information[1])"
             type="checkbox"
           />
           <span v-if="information[0].length >= 2">{{ value }}</span>
-          <span v-else-if="information[0].length == 1">{{ filter[0].toUpperCase() + filter.slice(1) }}</span>
+          <span v-else-if="information[0].length == 1">{{
+            filter[0].toUpperCase() + filter.slice(1)
+          }}</span>
         </label>
       </div>
     </div>
@@ -88,7 +92,10 @@ export default {
           const filterName = filter.split(':')[0]
           const filterValue = filter.split(':')[1]
           if (!!this.filtersSelected[filter]) {
-            if (c[filterName] === filterValue || (!filterValue && c[filterName] === this.filtersSelected[filter])) {
+            if (
+              c[filterName] === filterValue ||
+              (!filterValue && c[filterName] === this.filtersSelected[filter])
+            ) {
               categoryMatch[filterName] = true
               continue
             }

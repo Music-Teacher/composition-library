@@ -11,7 +11,7 @@ import CompositionGrid from '../components/CompositionGrid.vue'
       :databaseFile="store.databaseFile"
       :numberOfCompositions="store.compositions.length"
     />
-    <CompositionGrid v-if="!store.noRootFolder()"/>
+    <CompositionGrid v-if="!store.noRootFolder()" />
   </main>
 </template>
 

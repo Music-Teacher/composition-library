@@ -13,7 +13,7 @@ class Helpers:
   - get_info_file_name_from_als: Get the expected info file name from a given ALS file.
   - is_expected_file: Check if a file has one of the expected extensions.
   - get_audio_files_related_to_als: Get audio files related to a given ALS file.
-  - get_coverart: Get cover art image related to a given ALS file.
+  - get_cover_art: Get cover art image related to a given ALS file.
   - get_fields_from_file: Extract fields from an info file.
   - is_status_complete: Check if a status string indicates completion.
   - log: Log a message with a timestamp.
@@ -74,7 +74,7 @@ class Helpers:
     return audio_files
 
   @staticmethod
-  def get_coverart(als_file_path):
+  def get_cover_art(als_file_path):
     als_dir = os.path.dirname(als_file_path)
     for file in Helpers.get_all_files_in_dir_sorted_by_date_desc(als_dir):
       if Helpers.is_expected_file(file, ["jpg", "jpeg", "png"]):

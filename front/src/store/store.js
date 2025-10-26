@@ -8,6 +8,7 @@ export const store = reactive({
   refreshDatabaseError: null,
   backendError: null,
   serverUrl: 'http://localhost:5556',
+  audioToPlay: [],
   async fetchCompositions() {
     this.isLoading = true
     console.log('Fetching compositions...')
@@ -54,9 +55,9 @@ export const store = reactive({
         throw new Error('Failed to fetch about info')
       }
       const data = await response.json()
-      if(this.noRootFolder()) {
+      if (this.noRootFolder()) {
         this.rootFolder = data.root_folder
-        console.log("Fetched root folder", data.root_folder)
+        console.log('Fetched root folder', data.root_folder)
       }
       this.databaseFile = data.output_json_file
       this.backendError = null
@@ -83,8 +84,6 @@ export const store = reactive({
       await response.json()
       this.backendError = null
       console.log('Info file created.')
-      // Refresh compositions to reflect the new info file
-      await this.fetchCompositions()
     } catch (backendError) {
       console.error('Error creating info file:', backendError)
       this.backendError = 'Error creating info file: ' + backendError
@@ -103,9 +102,22 @@ export const store = reactive({
     return substring === text ? text : '...' + substring
   },
   noRootFolder() {
-    return this.rootFolder === "" || this.rootFolder == null || this.rootFolder === undefined
+    return this.rootFolder === '' || this.rootFolder == null || this.rootFolder === undefined
   },
   isRefreshDatabaseError() {
     return this.refreshDatabaseError !== null
-  }
+  },
+  setAudioToPlay(audio_source, artist, title, audio_extension, cover_art_source) {
+    console.log('Setting audio to play:', artist, title, audio_source, audio_extension)
+    this.audioToPlay.audio_source = audio_source
+    this.audioToPlay.artist = artist
+    this.audioToPlay.title = title
+    this.audioToPlay.audio_extension = audio_extension
+    if (cover_art_source) {
+      console.log('Setting cover art:', cover_art_source)
+      this.audioToPlay.cover_art = cover_art_source
+    } else {
+      this.audioToPlay.cover_art = null
+    }
+  },
 })

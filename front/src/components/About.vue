@@ -3,7 +3,10 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="lister_details menu_section" :class="{ 'no_root_folder': noRootFolder,  'error': isRootFolderError}">
+  <div
+    class="lister_details menu_section"
+    :class="{ no_root_folder: noRootFolder, error: isRootFolderError }"
+  >
     <details :open="noRootFolder || isRootFolderError">
       <summary>About this library</summary>
       <ul>
@@ -19,7 +22,10 @@ import { store } from '../store/store.js'
             v-model="localRootFolder"
             name="localRootFolder"
           />
-          <button @click="validateFolder" :disabled="!noRootFolder && localRootFolder === rootFolder">
+          <button
+            @click="validateFolder"
+            :disabled="!noRootFolder && localRootFolder === rootFolder"
+          >
             Validate
           </button>
         </li>
@@ -59,7 +65,7 @@ export default {
     },
     isRootFolderError() {
       return store.isRefreshDatabaseError()
-    }
+    },
   },
   async mounted() {
     await store.fetchAboutInfo()
