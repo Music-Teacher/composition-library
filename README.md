@@ -1,6 +1,7 @@
 # Composition Library
 
 It can be difficult to list and order all compositions: different folders, wrong names, etc...
+
 **If that's your case, this program is for you!**
 
 The purpose of this program is to make a webpage library of all your compositions.
