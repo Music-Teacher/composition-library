@@ -1,10 +1,9 @@
 import os
 import json
-
 from libs.Composition import Composition
 from libs.Helpers import Helpers
-
 log = Helpers.log
+
 
 class MusicLister:
   """
