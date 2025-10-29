@@ -3,11 +3,11 @@ import { store } from '../store/store.js'
 </script>
 
 <template>
-  <div class="audio_player_container" v-if="audio_source">
+  <div class="audio_player_container" v-if="audio_selected">
     <div class="audio_player_cover_art" v-if="cover_art_source">
       <img :src="cover_art_source" alt="Cover Art" title="Cover Art" />
     </div>
-    <div class="audio_information">
+    <div class="audio_player_information">
       <div class="audio_player_title" v-if="title">
         {{ title }}
       </div>
@@ -20,6 +20,9 @@ import { store } from '../store/store.js'
         <source :src="audio_source" :type="'audio/' + audio_extension" />
       </audio>
     </div>
+    <div class="audio_player_extra_controls">
+      <p @click="toggleLoop" :class="{loop_enabled: loop}">↳↰</p>
+    </div>
   </div>
 </template>
 
@@ -28,21 +31,18 @@ export default {
   data() {
     return {
       playing: false,
+      loop: false,
     }
   },
   watch: {
-    audio_source: function (newVal, oldVal) {
-      if (newVal !== oldVal) {
-        console.log('Audio source changed, playing new audio')
-        this.$nextTick(() => {
-          if (this.audio_element) {
-            this.audio_element.pause()
-            this.audio_element.load()
-            this.audio_element.play()
-            this.playing = true
-          }
-        })
-      }
+    audio_source: function (newVal) {
+      console.log('A play audio button was played, will play the audio now (', newVal, ')')
+      this.$nextTick(() => {
+        this.audio_element.pause()
+        this.audio_element.load()
+        this.audio_element.play()
+        this.playing = true
+      })
     },
   },
   computed: {
@@ -89,6 +89,12 @@ export default {
           console.log("Pausing audio")
           this.audio_element.pause()
         }
+      }
+    },
+    toggleLoop() {
+      this.loop = !this.loop
+      if (this.audio_element) {
+        this.audio_element.loop = this.loop
       }
     },
   },
