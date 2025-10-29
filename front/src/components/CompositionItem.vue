@@ -46,7 +46,7 @@ import { store } from '../store/store.js'
         <a
           href="#"
           class="play_this_audio"
-          @click.prevent="play_this_audio(this.composition.audio_files[0])"
+          @click.prevent="play_this_audio(composition.audio_files[0])"
         >
           Play this audio
         </a>

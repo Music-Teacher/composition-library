@@ -25,22 +25,30 @@ import { store } from '../store/store.js'
 
 <script>
 export default {
+  data() {
+    return {
+      playing: false,
+    }
+  },
   watch: {
     audio_source: function (newVal, oldVal) {
       if (newVal !== oldVal) {
         console.log('Audio source changed, playing new audio')
         this.$nextTick(() => {
-          const audioElement = this.$el.querySelector('audio')
-          if (audioElement) {
-            audioElement.pause()
-            audioElement.load()
-            audioElement.play()
+          if (this.audio_element) {
+            this.audio_element.pause()
+            this.audio_element.load()
+            this.audio_element.play()
+            this.playing = true
           }
         })
       }
     },
   },
   computed: {
+    audio_selected() {
+      return !!this.audio_source
+    },
     audio_source() {
       return store.audioToPlay.audio_source
     },
@@ -56,6 +64,31 @@ export default {
     cover_art_source() {
       if (store.audioToPlay.cover_art) {
         return store.audioToPlay.cover_art
+      }
+    },
+    audio_element() {
+      return this.$el.querySelector('audio')
+    },
+  },
+  async mounted() {
+    document.addEventListener('keydown', this.onKeyDown)
+  },
+  beforeDestroy() {
+    document.removeEventListener('keyup', this.onKeyDown)
+  },
+  methods: {
+    async onKeyDown(event) {
+      if (event.code == 'Space' && this.audio_selected && this.audio_element) {
+        console.log("'Space' pressed, toggling play/pause")
+        this.playing = !this.playing
+        event.preventDefault()
+        if (this.playing) {
+          console.log("Playing audio")
+          this.audio_element.play()
+        } else {
+          console.log("Pausing audio")
+          this.audio_element.pause()
+        }
       }
     },
   },
