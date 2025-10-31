@@ -42,6 +42,7 @@ export default {
         this.audio_element.load()
         this.audio_element.play()
         this.playing = true
+        this.audio_element.loop = false
       })
     },
   },

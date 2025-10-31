@@ -574,7 +574,7 @@ details {
     }
 
     .loop_enabled {
-      color: #fff;
+      color: light-dark(#000, #fff);
     }
   }
 }
