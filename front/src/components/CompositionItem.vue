@@ -18,7 +18,7 @@ import { store } from '../store/store.js'
     </h3>
     <p class="file_name" v-if="can_be_renamed">
       <button @click="store.rename_project(composition.full_als_file_path, artist, title)">
-        Rename to "{{ artist }} - {{ title }}.als"
+        Rename to "{{ artist }} - {{ title }}"
       </button>
     </p>
     <p class="status" v-if="project_finished && !composition.cover_art">{{ composition.status }}</p>
@@ -169,7 +169,7 @@ export default {
       return null
     },
     can_be_renamed() {
-      return this.artist && this.title && this.composition.als_file_name !== `${this.artist} - ${this.title}.als`
+      return this.composition.artist && this.composition.title && this.composition.als_file_name !== `${this.artist} - ${this.title}.als`
     },
   },
   methods: {
