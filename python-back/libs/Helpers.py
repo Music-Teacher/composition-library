@@ -156,7 +156,7 @@ class Helpers:
     item_name = os.path.basename(original_file_path)
     new_item_name = item_name.replace(project_name, new_base_name)
     new_full_path = os.path.join(item_path, new_item_name)
-    return new_path
+    return new_full_path
 
   @staticmethod
   def log(message):

@@ -7,13 +7,20 @@ import { store } from '../store/store.js'
     <div class="cover_art" v-if="!!composition.cover_art">
       <img :src="cover_art_source" alt="Cover Art" title="Cover Art" loading="lazy" />
     </div>
-    <h2 class="title" :class="{clickable_title: has_main_audio_file}" @click.prevent="play_this_audio(composition.audio_files[0])">{{ title }}</h2>
+    <h2 class="title" :class="{clickable_title: has_main_audio_file}" @click.prevent="play_this_audio(composition.audio_files[0])">
+      {{ title }}
+    </h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
     <h3 class="album">
       <span v-if="composition.album">Album: {{ composition.album }}</span>
       <span v-else-if="composition.ep">EP: {{ composition.ep }}</span>
       <span v-else-if="project_finished">Single</span>
     </h3>
+    <p class="file_name" v-if="can_be_renamed">
+      <button @click="store.rename_project(composition.full_als_file_path, artist, title)">
+        Rename to "{{ artist }} - {{ title }}.als"
+      </button>
+    </p>
     <p class="status" v-if="project_finished && !composition.cover_art">{{ composition.status }}</p>
     <p
       class="rework"
@@ -160,6 +167,9 @@ export default {
         return store.getCoverArt(this.composition.cover_art)
       }
       return null
+    },
+    can_be_renamed() {
+      return this.artist && this.title && this.composition.als_file_name !== `${this.artist} - ${this.title}.als`
     },
   },
   methods: {

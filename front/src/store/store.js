@@ -120,4 +120,27 @@ export const store = reactive({
       this.audioToPlay.cover_art = null
     }
   },
+  async rename_project(oldFullPath, newArtist, newTitle) {
+    this.isLoading = true
+    console.log('Renaming composition file:', oldFullPath, 'to', newArtist, '-', newTitle)
+    try {
+      const params = new URLSearchParams({
+        als_file_path: oldFullPath,
+        artist: newArtist,
+        title: newTitle
+      })
+      const response = await fetch(this.serverUrl + '/rename_project?' + params.toString())
+      if (!response.ok) {
+        throw new Error('Failed to rename composition file')
+      }
+      await response.json()
+      this.backendError = null
+      console.log('Composition file renamed.')
+    } catch (backendError) {
+      console.error('Error renaming composition file:', backendError)
+      this.backendError = 'Error renaming composition file: ' + backendError
+    }
+    await this.refreshDatabaseAndFetchCompositions()
+    this.isLoading = false
+  }
 })
