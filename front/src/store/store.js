@@ -107,9 +107,11 @@ export const store = reactive({
   isRefreshDatabaseError() {
     return this.refreshDatabaseError !== null
   },
-  setAudioToPlay(audio_source, artist, title, audio_extension, cover_art_source) {
-    console.log('Setting audio to play:', artist, title, audio_source, audio_extension)
-    this.audioToPlay.audio_source = audio_source
+  setAudioToPlay(audio_file, audio_file_name, artist, title, audio_extension, cover_art_source) {
+    console.log('Setting audio to play:', artist, title, audio_file, audio_extension)
+    this.audioToPlay.audio_file = audio_file
+    this.audioToPlay.audio_file_name = audio_file_name
+    this.audioToPlay.audio_source = this.getMainAudioSource(audio_file)
     this.audioToPlay.artist = artist
     this.audioToPlay.title = title
     this.audioToPlay.audio_extension = audio_extension

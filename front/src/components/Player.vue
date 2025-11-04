@@ -14,6 +14,7 @@ import { store } from '../store/store.js'
       <div class="audio_player_artist_album" v-if="artist">
         {{ artist }}
       </div>
+      <p>{{ audio_file_name }}</p>
     </div>
     <div class="audio_player_controls">
       <audio controls loop autoplay controlslist="play nofullscreen nodownload noplaybackrate">
@@ -58,6 +59,9 @@ export default {
     },
     title() {
       return store.audioToPlay.title
+    },
+    audio_file_name() {
+      return store.audioToPlay.audio_file_name
     },
     audio_extension() {
       return store.audioToPlay.audio_extension

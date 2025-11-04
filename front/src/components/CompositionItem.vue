@@ -178,14 +178,15 @@ export default {
       return parts.length > 1 ? parts[parts.length - 1] : null
     },
     audio_file_name(audio_file_path) {
-      return audio_file_path.substring(audio_file_path.lastIndexOf('/') + 1)
+      return audio_file_path.substring(audio_file_path.replaceAll("\\", "/").lastIndexOf('/') + 1)
     },
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)
     },
     play_this_audio(audio_file) {
       store.setAudioToPlay(
-        this.audio_file_source(audio_file),
+        audio_file,
+        this.audio_file_name(audio_file),
         this.artist,
         this.title,
         this.audio_extension(audio_file),
