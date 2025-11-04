@@ -16,6 +16,10 @@ class Helpers:
   - get_cover_art: Get cover art image related to a given ALS file.
   - get_fields_from_file: Extract fields from an info file.
   - is_status_complete: Check if a status string indicates completion.
+  - get_all_project_items: Get all project item paths related to a given ALS file.
+  - get_project_name_from_als: Get the project name from a given ALS file.
+  - get_file_extension: Get the file extension from a file path.
+  - get_renamed_item_path: Get the new path for a renamed project item.
   - log: Log a message with a timestamp.
   """
 
@@ -53,7 +57,8 @@ class Helpers:
   def is_expected_file(file_path, list_of_extensions):
     if os.path.isfile(file_path) and list_of_extensions:
       file_name = os.path.basename(file_path)
-      if '.' in file_name and file_name.split('.')[-1] in list_of_extensions:
+      extension = Helpers.get_file_extension(file_path)
+      if extension and extension.lower() in [ext.lower() for ext in list_of_extensions]:
         return True
     return False
 
@@ -122,6 +127,36 @@ class Helpers:
     if match:
       return True
     return False
+  
+  @staticmethod
+  def get_project_name_from_als(als_file_path):
+    if Helpers.is_als(als_file_path):
+      return os.path.basename(als_file_path).replace(".als", "")
+    return None
+  
+  @staticmethod
+  def get_all_project_items(als_file_path):
+    if not Helpers.is_als(als_file_path):
+      return []
+    list_of_elements = [als_file_path]
+    list_of_elements.append(Helpers.get_info_file_name_from_als(als_file_path))
+    # Project folder must be included last
+    list_of_elements.append(os.path.dirname(als_file_path))
+    return list_of_elements
+  
+  @staticmethod
+  def get_file_extension(file_path):
+    if os.path.isfile(file_path) and '.' in os.path.basename(file_path):
+      return os.path.basename(file_path).split('.')[-1]
+    return ''
+  
+  @staticmethod
+  def get_renamed_item_path(original_file_path, project_name, new_base_name):
+    item_path = os.path.dirname(original_file_path)
+    item_name = os.path.basename(original_file_path)
+    new_item_name = item_name.replace(project_name, new_base_name)
+    new_full_path = os.path.join(item_path, new_item_name)
+    return new_path
 
   @staticmethod
   def log(message):

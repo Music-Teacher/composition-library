@@ -65,6 +65,25 @@ class MainThread:
             log("ERROR: No ALS file path provided.")
 
 
+        # This command renames everything of the project
+        #  to 'artist - title' format
+        elif command == "rename_project":
+          log("Attempting to create info file...")
+          if ("als_file_path" in parameters and parameters["als_file_path"][0] and
+              "artist" in parameters and parameters["artist"][0] and
+              "title" in parameters and parameters["title"][0]):
+            als_file_path = parameters["als_file_path"][0]
+            artist = parameters["artist"][0]
+            title = parameters["title"][0]
+            if Actions.rename_project(als_file_path, artist, title):
+              success_event.set()
+              log(f"Project renaming command completed: '{artist} - {title}'.")
+            else:
+              log("ERROR: Project renaming command failed.")
+          else:
+            log("ERROR: Missing parameters for project renaming (als_file_path, artist and title required).")
+
+
       except Exception as e:
         log(f"ERROR: Main code execution failed: {e}")
 

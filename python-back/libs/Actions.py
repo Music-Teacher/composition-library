@@ -37,3 +37,24 @@ class Actions:
         pass
     log(f"ERROR: Could not create info file for ALS: '{als_file_path}'")
     return False
+
+  @staticmethod
+  def rename_project(als_file_path, artist, title):
+    list_of_files_to_rename = Helpers.get_all_project_items(als_file_path)
+    if not list_of_files_to_rename:
+      log(f"ERROR: Could not find project files to rename for ALS: '{als_file_path}'")
+      return False
+    project_name = Helpers.get_project_name_from_als(als_file_path)
+    if not project_name:
+      log(f"ERROR: Could not determine project name from ALS: '{als_file_path}'")
+      return False
+    new_base_name = f"{artist} - {title}"
+    for file_path in list_of_files_to_rename:
+      new_file_path = Helpers.get_renamed_item_path(file_path, project_name, new_base_name)
+      try:
+        os.rename(file_path, new_file_path)
+        log(f"Renamed file: '{file_path}' -> '{new_file_path}'")
+      except Exception as e:
+        log(f"ERROR: Could not rename file '{file_path}' to '{new_file_path}': {e}")
+        return False
+    return True
