@@ -81,6 +81,7 @@ app.get('/audiostream', (req, res) => { // /audiostream?file=full_audio_path
   if(!req.query.file) {
     res.status(500).send('No file provided');
     log("No file provided")
+    return;
   }
   const full_audio_path = decodeURIComponent(req.query.file)
   log("Full audio path: " + full_audio_path);
@@ -98,6 +99,7 @@ app.get('/coverart', (req, res) => { // /coverart?file=full_cover_art_path
   if(!req.query.file) {
     res.status(500).send('No file provided');
     log("No file provided")
+    return;
   }
   const full_cover_art_path = decodeURIComponent(req.query.file)
   log("Full cover art path: " + full_cover_art_path);
@@ -121,6 +123,7 @@ app.get('/create_info_file', (req, res) => { // /create_info_file?als_file_path=
   if(!req.query.als_file_path) {
     res.status(500).send('No ALS file path provided');
     log("No ALS file path provided")
+    return;
   }
   const als_file_path = decodeURIComponent(req.query.als_file_path)
   log("Full ALS file path: " + als_file_path);
@@ -149,6 +152,7 @@ app.get('/rename_project', (req, res) => { // /rename_project?als_file_path=als_
   if(!req.query.als_file_path || !req.query.artist || !req.query.title) {
     res.status(500).send('Missing parameters');
     log("Missing parameters")
+    return;
   }
   const als_file_path = decodeURIComponent(req.query.als_file_path)
   const artist = decodeURIComponent(req.query.artist)
@@ -172,7 +176,7 @@ app.get('/rename_project', (req, res) => { // /rename_project?als_file_path=als_
     read_database();
     log("Project renamed and database updated")
   });
-}
+})
 
 app.listen(port, () => {
   log(`Backend listening on port ${port}`)
