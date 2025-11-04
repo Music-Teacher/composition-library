@@ -144,6 +144,36 @@ app.get('/create_info_file', (req, res) => { // /create_info_file?als_file_path=
   });
 })
 
+app.get('/rename_project', (req, res) => { // /rename_project?als_file_path=als_file_path&artist=artist&title=title
+  log("Looking to rename project")
+  if(!req.query.als_file_path || !req.query.artist || !req.query.title) {
+    res.status(500).send('Missing parameters');
+    log("Missing parameters")
+  }
+  const als_file_path = decodeURIComponent(req.query.als_file_path)
+  const artist = decodeURIComponent(req.query.artist)
+  const title = decodeURIComponent(req.query.title)
+  log(`Renaming project at ${als_file_path} to ${artist} - ${title}`);
+
+  request('http://' + PYTHON_BACKEND_URL + '/rename_project?als_file_path=' + encodeURIComponent(als_file_path) + '&artist=' + encodeURIComponent(artist) + '&title=' + encodeURIComponent(title), function (error, response, body) {
+    if (error) {
+      console.error('Error making request to Python Backend:', error);
+      res.status(500).send('Error making request to Python Backend');
+      log("Error making request to Python Backend: "+ error)
+      return;
+    }
+    if (response.statusCode !== 200) {
+      console.error('Non-200 response status code:', response.statusCode);
+      res.status(response.statusCode).send('Non-200 response status code');
+      log("Non-200 response status code: " + response.statusCode)
+      return;
+    }
+    res.send(response);
+    read_database();
+    log("Project renamed and database updated")
+  });
+}
+
 app.listen(port, () => {
   log(`Backend listening on port ${port}`)
 })
