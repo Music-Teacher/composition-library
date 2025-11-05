@@ -14,9 +14,9 @@ import { store } from '../store/store.js'
       <div class="audio_player_artist_album" v-if="artist">
         {{ artist }}
       </div>
-      <p>{{ audio_file_name }}</p>
     </div>
     <div class="audio_player_controls">
+      <div class="audio_file_name"><p>{{ audio_file_name }}</p></div>
       <audio controls loop autoplay controlslist="play nofullscreen nodownload noplaybackrate">
         <source :src="audio_source" :type="'audio/' + audio_extension" />
       </audio>

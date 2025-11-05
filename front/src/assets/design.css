@@ -335,11 +335,16 @@ details {
       &.clickable_title {
         cursor: pointer;
         &:hover {
-          color: #0077ff;
+          /* color: #0077ff; */
           &::after {
-            content: '\00a0\00a0\00a0▶';
-            font-size: 0.9rem;
+            opacity: 1;
           }
+        }
+        &::after {
+          content: '\00a0\00a0\00a0▶';
+          font-size: 0.9rem;
+          vertical-align: text-top;
+          opacity: 0.1;
         }
       }
     }
@@ -535,10 +540,21 @@ details {
     display: inline-block;
     vertical-align: middle;
     margin-right: 1rem;
+    width: 15em;
+
+    .audio_file_name {
+      width: 100%;
+      box-sizing: border-box;
+      font-size: 0.8rem;
+
+      p {
+        display: inline-block;
+      }
+    }
 
     audio {
-      vertical-align: middle;
-      height: 40px;
+      height: 20px;
+      width: 100%;
     }
   }
 
