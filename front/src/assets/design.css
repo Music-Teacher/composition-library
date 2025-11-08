@@ -229,7 +229,6 @@ details {
     display: inline-block;
     margin-right: 0.5rem;
     select {
-      /* padding: 2px 8px; */
       text-overflow: clip;
     }
     input {
@@ -327,26 +326,12 @@ details {
         color: light-dark(#2ecc71, #09a94c);
       }
     }
+
     .title {
       font-size: 1.1rem;
       margin-bottom: 0.3rem;
       word-break: break-word;
-
-      &.clickable_title {
-        cursor: pointer;
-        &:hover {
-          /* color: #0077ff; */
-          &::after {
-            opacity: 1;
-          }
-        }
-        &::after {
-          content: '\00a0\00a0\00a0▶';
-          font-size: 0.9rem;
-          vertical-align: text-top;
-          opacity: 0.1;
-        }
-      }
+      margin-right: 100px;
     }
     h3 {
       font-size: 0.8rem;
@@ -374,21 +359,6 @@ details {
       .als_file_path::before {
         content: '🗀 ';
       }
-      .audio_file {
-        &::before {
-          content: '▷ ';
-        }
-        &.not_exported {
-          font-weight: bold;
-        }
-      }
-      .audio_source audio {
-        vertical-align: middle;
-        width: 100%;
-        max-width: 250px;
-        margin-top: 0.3rem;
-        height: 40px;
-      }
       .no_info_file {
         &::before {
           content: '❗';
@@ -406,13 +376,9 @@ details {
       }
     }
 
-    .play_this_audio {
-      font-weight: 600;
-      text-decoration: underline;
-      cursor: pointer;
-      &::before {
-        content: '▶️ ';
-        text-decoration: none;
+    .audio_file {
+      .text_information {
+        cursor: pointer;
       }
     }
 
@@ -467,48 +433,39 @@ details {
         font-size: 0.9em;
       }
     }
-  }
-}
 
-/* ===== Collapsible Extra Info (click to open) ===== */
-.compositions .composition {
-  details.composition_details {
-    margin-top: 0.5rem;
-    font-size: 0.8rem;
-    &[open] summary::after {
-      content: ' ➖';
-      color: #2ecc71;
-    }
+    details.composition_details {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      &[open] summary::after {
+        content: ' ➖';
+        color: #2ecc71;
+      }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 0.3rem;
-    }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.3rem;
+      }
 
-    th,
-    td {
-      padding: 0.2rem 0.3rem;
-      text-align: left;
-      border-bottom: 1px solid light-dark(#f0f0f0, #cccccc);
-      vertical-align: top;
-      white-space: pre-wrap;
-    }
+      th,
+      td {
+        padding: 0.2rem 0.3rem;
+        text-align: left;
+        border-bottom: 1px solid light-dark(#f0f0f0, #cccccc);
+        vertical-align: top;
+        white-space: pre-wrap;
+      }
 
-    th {
-      font-weight: 600;
-      color: light-dark(#444, #999);
-    }
-
-    .audio_source audio {
-      width: 100px;
-      padding: 0;
-      margin: 0;
-      height: 30px;
+      th {
+        font-weight: 600;
+        color: light-dark(#444, #999);
+      }
     }
   }
 }
 
+/* ===== Audio Player ===== */
 .audio_player_container {
   display: inline;
   position: fixed;

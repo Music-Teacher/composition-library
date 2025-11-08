@@ -7,7 +7,7 @@ import { store } from '../store/store.js'
     <div class="cover_art" v-if="!!composition.cover_art">
       <img :src="cover_art_source" alt="Cover Art" title="Cover Art" loading="lazy" />
     </div>
-    <h2 class="title" :class="{clickable_title: has_main_audio_file}" @click.prevent="play_this_audio(composition.audio_files[0])">
+    <h2 class="title">
       {{ title }}
     </h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
@@ -43,11 +43,11 @@ import { store } from '../store/store.js'
           composition.als_file_name
         }}</span>
       </p>
-      <p v-if="has_main_audio_file" class="audio_file">
+      <p v-if="has_main_audio_file" class="audio_file" @click.prevent="play_this_audio(composition.audio_files[0])">
         Latest audio:
-        <span class="text_information" :title="main_audio_file_name">{{
-          short_main_audio_file_name
-        }}</span>
+        <span class="text_information" :title="play_main_audio_file_name">
+          {{ short_main_audio_file_name }}
+        </span>
       </p>
       <p
         v-if="project_finished && !has_main_audio_file"
@@ -76,11 +76,8 @@ import { store } from '../store/store.js'
           <tr v-if="has_other_audio_files">
             <th>Other audio</th>
             <td>
-              <p v-for="audio_file in other_audio_files" class="audio_source">
-                {{ audio_file_name(audio_file) }}<br />
-                <a href="#" class="play_this_audio" @click.prevent="play_this_audio(audio_file)">
-                  Play this audio
-                </a>
+              <p v-for="audio_file in other_audio_files" class="audio_file" @click.prevent="play_this_audio(audio_file)">
+                <span class="text_information">{{ audio_file_name(audio_file) }}</span>
               </p>
             </td>
           </tr>
@@ -116,6 +113,12 @@ export default {
       if (this.has_main_audio_file) {
         return this.audio_file_source(this.composition.audio_files[0])
       }
+    },
+    play_main_audio_file_name() {
+      if (this.has_main_audio_file) {
+        return "Play audio " + this.main_audio_file_name
+      }
+      return "No audio available"
     },
     main_audio_file_name() {
       if (this.has_main_audio_file) {
