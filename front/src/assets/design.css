@@ -354,10 +354,10 @@ details {
       margin-bottom: 0.5rem;
       overflow-wrap: anywhere;
       .last_activity::before {
-        content: '⏱ ';
+        content: '🗓️ ';
       }
       .als_file_path::before {
-        content: '🗀 ';
+        content: '🗂️ ';
       }
       .no_info_file {
         &::before {
@@ -376,7 +376,10 @@ details {
       }
     }
 
-    .audio_file {
+    .audio_file::before {
+      content: '🔊 ';
+    }
+    .audio_source {
       .text_information {
         cursor: pointer;
       }
