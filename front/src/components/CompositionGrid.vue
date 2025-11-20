@@ -138,6 +138,9 @@ export default {
   },
   created() {
     this.sortBy = 'activity'
+    this.filtersSelected = this.$route.query.filters
+      ? JSON.parse(this.$route.query.filters)
+      : {}
   },
   beforeDestroy() {
     if (this.pollingInterval) {
@@ -172,6 +175,7 @@ export default {
       return [...new Set(array)]
     },
     toggleFilter(filter, value, exclusive) {
+      console.log('Toggling filter:', filter, 'Value:', value, 'Exclusive:', exclusive)
       if (!!exclusive) {
         this.filtersAvailable[filter][0].forEach((e) => {
           const filterIndex = this.make_filter_index(filter, e)
@@ -180,6 +184,16 @@ export default {
           }
         })
       }
+      Object.keys(this.filtersSelected).forEach((filterIndex) => {
+        if (this.filtersSelected[filterIndex] === false) {
+          delete this.filtersSelected[filterIndex]
+        }
+      })
+      let query_string = { filters: JSON.stringify(this.filtersSelected) }
+      if (Object.keys(this.filtersSelected).length === 0) {
+        query_string = {}
+      }
+      this.$router.push({ query: query_string })
     },
     make_filter_index(filter, value) {
       return filter + ':' + value
