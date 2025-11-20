@@ -129,7 +129,7 @@ export const store = reactive({
       const params = new URLSearchParams({
         als_file_path: oldFullPath,
         artist: newArtist,
-        title: newTitle
+        title: newTitle,
       })
       const response = await fetch(this.serverUrl + '/rename_project?' + params.toString())
       if (!response.ok) {
@@ -144,5 +144,5 @@ export const store = reactive({
     }
     await this.refreshDatabaseAndFetchCompositions()
     this.isLoading = false
-  }
+  },
 })

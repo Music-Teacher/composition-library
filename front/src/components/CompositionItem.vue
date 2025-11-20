@@ -11,10 +11,8 @@ import { store } from '../store/store.js'
       {{ title }}
     </h2>
     <h3 class="artist">Artist: {{ composition.artist }}</h3>
-    <h3 class="album">
-      <span v-if="composition.album">Album: {{ composition.album }}</span>
-      <span v-else-if="composition.ep">EP: {{ composition.ep }}</span>
-      <span v-else-if="project_finished">Single</span>
+    <h3 class="album" v-if="album_ep_or_single">
+      <span>{{ album_ep_or_single }}</span>
     </h3>
     <p class="file_name" v-if="can_be_renamed">
       <button @click="store.rename_project(composition.full_als_file_path, artist, title)">
@@ -33,17 +31,21 @@ import { store } from '../store/store.js'
     <div class="composition_main_info">
       <p class="last_activity">
         Last activity:
-        <span class="text_information" :title="composition.last_activity">{{
-          pretty_last_activity
-        }}</span>
+        <span class="text_information" :title="composition.last_activity">
+          {{ pretty_last_activity }}
+        </span>
       </p>
       <p class="als_file_path">
         File name:
-        <span class="text_information" :title="composition.als_file_path">{{
-          composition.als_file_name
-        }}</span>
+        <span class="text_information" :title="composition.als_file_path">
+          {{ composition.als_file_name }}
+        </span>
       </p>
-      <p v-if="has_main_audio_file" class="audio_file audio_source" @click.prevent="play_this_audio(composition.audio_files[0])">
+      <p
+        v-if="has_main_audio_file"
+        class="audio_file audio_source"
+        @click.prevent="play_this_audio(composition.audio_files[0])"
+      >
         Latest audio:
         <span class="text_information" :title="play_main_audio_file_name">
           {{ short_main_audio_file_name }}
@@ -76,7 +78,11 @@ import { store } from '../store/store.js'
           <tr v-if="has_other_audio_files">
             <th>Other audio</th>
             <td>
-              <p v-for="audio_file in other_audio_files" class="audio_source" @click.prevent="play_this_audio(audio_file)">
+              <p
+                v-for="audio_file in other_audio_files"
+                class="audio_source"
+                @click.prevent="play_this_audio(audio_file)"
+              >
                 <span class="text_information">{{ audio_file_name(audio_file) }}</span>
               </p>
             </td>
@@ -116,9 +122,9 @@ export default {
     },
     play_main_audio_file_name() {
       if (this.has_main_audio_file) {
-        return "Play audio " + this.main_audio_file_name
+        return 'Play audio ' + this.main_audio_file_name
       }
-      return "No audio available"
+      return 'No audio available'
     },
     main_audio_file_name() {
       if (this.has_main_audio_file) {
@@ -150,6 +156,20 @@ export default {
     title() {
       return this.composition.title || this.composition.als_file_name
     },
+    album_ep_or_single() {
+      let return_string = ''
+      if (this.composition.album) {
+        return_string = 'Album: ' + this.composition.album
+      } else if (this.composition.ep) {
+        return_string = 'Album: ' + this.composition.ep
+      } else if (this.project_finished) {
+        return_string = 'Single'
+      }
+      if (return_string && this.composition.index) {
+        return_string += ' (#' + this.composition.index + ')'
+      }
+      return return_string
+    },
     artist() {
       return this.composition.artist || null
     },
@@ -172,7 +192,11 @@ export default {
       return null
     },
     can_be_renamed() {
-      return this.composition.artist && this.composition.title && this.composition.als_file_name !== `${this.artist} - ${this.title}.als`
+      return (
+        this.composition.artist &&
+        this.composition.title &&
+        this.composition.als_file_name !== `${this.artist} - ${this.title}.als`
+      )
     },
   },
   methods: {
@@ -181,7 +205,7 @@ export default {
       return parts.length > 1 ? parts[parts.length - 1] : null
     },
     audio_file_name(audio_file_path) {
-      return audio_file_path.substring(audio_file_path.replaceAll("\\", "/").lastIndexOf('/') + 1)
+      return audio_file_path.substring(audio_file_path.replaceAll('\\', '/').lastIndexOf('/') + 1)
     },
     audio_file_source(audio_file_path) {
       return store.getMainAudioSource(audio_file_path)

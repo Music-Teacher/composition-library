@@ -16,13 +16,15 @@ import { store } from '../store/store.js'
       </div>
     </div>
     <div class="audio_player_controls">
-      <div class="audio_file_name"><p>{{ audio_file_name }}</p></div>
+      <div class="audio_file_name">
+        <p>{{ audio_file_name }}</p>
+      </div>
       <audio controls loop autoplay controlslist="play nofullscreen nodownload noplaybackrate">
         <source :src="audio_source" :type="'audio/' + audio_extension" />
       </audio>
     </div>
     <div class="audio_player_extra_controls">
-      <p @click="toggleLoop" :class="{loop_enabled: loop}">↳↰</p>
+      <p @click="toggleLoop" :class="{ loop_enabled: loop }">↳↰</p>
     </div>
   </div>
 </template>
@@ -88,10 +90,10 @@ export default {
         this.playing = !this.playing
         event.preventDefault()
         if (this.playing) {
-          console.log("Playing audio")
+          console.log('Playing audio')
           this.audio_element.play()
         } else {
-          console.log("Pausing audio")
+          console.log('Pausing audio')
           this.audio_element.pause()
         }
       }

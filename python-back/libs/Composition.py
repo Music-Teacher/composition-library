@@ -4,6 +4,18 @@ import json
 from libs.Helpers import Helpers
 log = Helpers.log
 
+# Data from the info file
+INFO_FILE_FIELDS = [
+    "title",
+    "artist",
+    "album",
+    "ep",
+    "index",
+    "lyrics",
+    "chords",
+    "extra_info",
+    "status"
+  ]
 
 class Composition:
   """
@@ -11,18 +23,12 @@ class Composition:
   It extracts and holds metadata from the ALS file and its related info file.
   It can provide a string representation and a JSON representation of itself.
   """
+  
+  # Dictionary to hold all field values from the info file
+  fields = None
 
-  # Data from the info file
-  title = None
-  artist = None
-  album = None
-  ep = None
-  lyrics = None
-  chords = None
-  extra_info = None
+  # Data derived from info file status field
   status = None
-
-  # Data derived from status
   rework = None
 
   # Data from the ALS file path
@@ -37,16 +43,8 @@ class Composition:
 
   @staticmethod
   def get_info_file_fields():
-    return [
-      "title",
-      "artist",
-      "album",
-      "ep",
-      "lyrics",
-      "chords",
-      "extra_info",
-      "status"
-    ]
+    global INFO_FILE_FIELDS
+    return INFO_FILE_FIELDS
 
   def __init__(self, als_file_path, root_folder=None):
     self.als_file_path = als_file_path
@@ -59,31 +57,20 @@ class Composition:
     self.audio_files = Helpers.get_audio_files_related_to_als(self.als_file_path)
     self.cover_art = Helpers.get_cover_art(self.als_file_path)
 
-    self.title = None
-    self.artist = None
-    self.album = None
-    self.ep = None
-    self.lyrics = None
-    self.chords = None
-    self.extra_info = None
-    self.status = None
+    self.fields = dict.fromkeys(Composition.get_info_file_fields(), None)
+
     self.rework = None
+    self.status = None
 
     self.gather_composition_information()
 
   def gather_composition_information(self):
     info = Helpers.get_fields_from_file(self.info_file_path, Composition.get_info_file_fields()) if self.info_file_path else dict()
 
-    self.title = info.get("title", None)
-    self.artist = info.get("artist", None)
-    self.album = info.get("album", None)
-    self.ep = info.get("ep", None)
-    self.lyrics = info.get("lyrics", None)
-    self.extra_info = info.get("extra_info", None)
-    self.chords = info.get("chords", None)
-    self.status = info.get("status", None)
+    for key in Composition.get_info_file_fields():
+      self.fields[key] = info.get(key, None)
 
-    if self.status and Helpers.is_status_complete(self.status):
+    if self.fields["status"] and Helpers.is_status_complete(self.fields["status"]):
       self.rework = None
       self.status = "Finished"
     else:
@@ -99,23 +86,27 @@ class Composition:
     return self.als_file_path
 
   def __str__(self):
-    local_artist = f"{self.artist} - " if self.artist else ""
-    return_string = f"# {local_artist}{self.title}\n"
+    local_artist = f"{self.fields['artist']} - " if self.fields['artist'] else ""
+    return_string = f"# {local_artist}{self.fields['title']}\n"
     return_string += f"Last activity: {self.last_activity}"
-    if self.album:
-      return_string += f"-- Album: {self.album}"
+    if self.fields["album"]:
+      return_string += f"-- Album: {self.fields['album']}"
+    elif self.fields["ep"]:
+      return_string += f"-- EP: {self.fields['ep']}"
+    if self.fields["album"] or self.fields["ep"]:
+      return_string += f" ({self.fields['index']})\n"
     return_string += f" + Status: {self.status}\n"
     if self.rework:
       return_string += f" + Rework: {self.rework}\n"
-    if self.chords:
+    if self.fields["chords"]:
       return_string += f" - Chords:\n"
-      return_string += f"{self.chords}\n"
-    if self.lyrics:
+      return_string += f"{self.fields['chords']}\n"
+    if self.fields["lyrics"]:
       return_string += f" - Lyrics:\n"
-      return_string += f"{self.lyrics}\n"
-    if self.extra_info:
+      return_string += f"{self.fields['lyrics']}\n"
+    if self.fields["extra_info"]:
       return_string += f" - Extra Info:\n"
-      return_string += f"{self.extra_info}\n"
+      return_string += f"{self.fields['extra_info']}\n"
     return_string += f"{self.als_file_path}\n\n"
     audio_generated = "exported" if self.audio_files else "not exported"
     return_string += f" -> Audio file {audio_generated}"
@@ -124,13 +115,9 @@ class Composition:
   def __json__(self, python=True):
     j = dict()
     
-    j["title"] = self.title
-    j["artist"] = self.artist
-    j["album"] = self.album
-    j["ep"] = self.ep
-    j["lyrics"] = self.lyrics
-    j["chords"] = self.chords
-    j["extra_info"] = self.extra_info
+    for key in Composition.get_info_file_fields():
+      j[key] = self.fields[key]
+
     j["status"] = self.status
     j["rework"] = self.rework
 

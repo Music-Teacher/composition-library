@@ -639,13 +639,13 @@ details {
       }
 
       .audio_player_title {
-        font-size: 1.0rem;
+        font-size: 1rem;
         display: inline;
         margin-right: 0.5rem;
       }
 
       .audio_player_artist_album {
-        font-size: 1.0rem;
+        font-size: 1rem;
         display: inline;
       }
     }
