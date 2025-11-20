@@ -15,7 +15,7 @@ import CompositionItem from './CompositionItem.vue'
         <option value="album">Album</option>
       </select>
       <label>
-        <input v-model="reverseSort" type="checkbox" />
+        <input v-model="reverseSort" @change="sortCompositions" type="checkbox" />
         <span>reverse</span>
       </label>
     </div>
@@ -123,7 +123,9 @@ export default {
           case 'title':
           case 'artist':
           case 'album':
-            returnValue = a[this.sortBy].localeCompare(b[this.sortBy])
+            if (!a[this.sortBy]) returnValue = 1
+            else if (!b[this.sortBy]) returnValue = -1
+            else returnValue = a[this.sortBy].localeCompare(b[this.sortBy])
             break
         }
         returnValue *= reverse
@@ -137,7 +139,8 @@ export default {
     await store.refreshDatabaseAndFetchCompositions()
   },
   created() {
-    this.sortBy = 'activity'
+    this.sortBy = this.$route.query.sort ? this.$route.query.sort : 'activity'
+    this.reverseSort = this.$route.query.reverse === 'true' ? true : false
     this.filtersSelected = this.$route.query.filters
       ? JSON.parse(this.$route.query.filters)
       : {}
@@ -156,6 +159,9 @@ export default {
   },
   methods: {
     sortCompositions() {
+      this.$router.push({
+        query: { ...this.$route.query, sort: this.sortBy, reverse: this.reverseSort },
+      })
       this.$forceUpdate()
     },
     filterFinished() {
@@ -189,11 +195,8 @@ export default {
           delete this.filtersSelected[filterIndex]
         }
       })
-      let query_string = { filters: JSON.stringify(this.filtersSelected) }
-      if (Object.keys(this.filtersSelected).length === 0) {
-        query_string = {}
-      }
-      this.$router.push({ query: query_string })
+      this.$router.push({ query: { ...this.$route.query, filters: JSON.stringify(this.filtersSelected) } })
+      this.$forceUpdate()
     },
     make_filter_index(filter, value) {
       return filter + ':' + value
