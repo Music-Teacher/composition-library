@@ -74,7 +74,7 @@ class Composition:
       self.rework = None
       self.status = "Finished"
     else:
-      self.rework = self.status
+      self.rework = self.fields["status"]
       self.status = "In Progress"
     
   def is_finished(self):
