@@ -46,6 +46,14 @@ export default {
         this.audio_element.play()
         this.playing = true
         this.audio_element.loop = false
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: this.title,
+          artist: this.artist,
+          album: '',
+          artwork: [
+            { src: this.cover_art_source || '', sizes: '512x512', type: 'image/png' },
+          ],
+        })
       })
     },
   },
@@ -81,20 +89,22 @@ export default {
     document.addEventListener('keydown', this.onKeyDown)
   },
   beforeDestroy() {
-    document.removeEventListener('keyup', this.onKeyDown)
+    document.removeEventListener('keydown', this.onKeyDown)
   },
   methods: {
     async onKeyDown(event) {
-      if (event.code == 'Space' && this.audio_selected && this.audio_element) {
-        console.log("'Space' pressed, toggling play/pause")
-        this.playing = !this.playing
-        event.preventDefault()
-        if (this.playing) {
-          console.log('Playing audio')
-          this.audio_element.play()
-        } else {
-          console.log('Pausing audio')
-          this.audio_element.pause()
+      if (this.audio_selected && this.audio_element) {
+        if (event.code == 'Space') {
+          console.log("'Space' pressed, toggling play/pause")
+          this.playing = !this.playing
+          if (this.playing) {
+            console.log('Playing audio')
+            this.audio_element.play()
+          } else {
+            console.log('Pausing audio')
+            this.audio_element.pause()
+          }
+          event.preventDefault()
         }
       }
     },
