@@ -141,9 +141,7 @@ export default {
   created() {
     this.sortBy = this.$route.query.sort ? this.$route.query.sort : 'activity'
     this.reverseSort = this.$route.query.reverse === 'true' ? true : false
-    this.filtersSelected = this.$route.query.filters
-      ? JSON.parse(this.$route.query.filters)
-      : {}
+    this.filtersSelected = this.$route.query.filters ? JSON.parse(this.$route.query.filters) : {}
   },
   beforeDestroy() {
     if (this.pollingInterval) {
@@ -195,7 +193,9 @@ export default {
           delete this.filtersSelected[filterIndex]
         }
       })
-      this.$router.push({ query: { ...this.$route.query, filters: JSON.stringify(this.filtersSelected) } })
+      this.$router.push({
+        query: { ...this.$route.query, filters: JSON.stringify(this.filtersSelected) },
+      })
       this.$forceUpdate()
     },
     make_filter_index(filter, value) {

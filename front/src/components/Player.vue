@@ -50,9 +50,7 @@ export default {
           title: this.title,
           artist: this.artist,
           album: '',
-          artwork: [
-            { src: this.cover_art_source || '', sizes: '512x512', type: 'image/png' },
-          ],
+          artwork: [{ src: this.cover_art_source || '', sizes: '512x512', type: 'image/png' }],
         })
       })
     },
