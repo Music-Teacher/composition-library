@@ -19,6 +19,7 @@ class Helpers:
   - get_all_project_items: Get all project item paths related to a given ALS file.
   - get_project_name_from_als: Get the project name from a given ALS file.
   - get_file_extension: Get the file extension from a file path.
+  - remove_file_extension: Retuen the file without its extension if any.
   - get_renamed_item_path: Get the new path for a renamed project item.
   - log: Log a message with a timestamp.
   """
@@ -81,8 +82,15 @@ class Helpers:
   @staticmethod
   def get_cover_art(als_file_path):
     als_dir = os.path.dirname(als_file_path)
+    extensions = ["jpg", "jpeg", "png"]
+    for ext in extensions:
+      print(ext)
+      test_cover = Helpers.remove_file_extension(als_file_path)+"."+ext
+      print(test_cover)
+      if os.path.isfile(test_cover):
+        return test_cover
     for file in Helpers.get_all_files_in_dir_sorted_by_date_desc(als_dir):
-      if Helpers.is_expected_file(file, ["jpg", "jpeg", "png"]):
+      if Helpers.is_expected_file(file, extensions):
         return os.path.join(als_dir, file)
     return None
 
@@ -149,6 +157,14 @@ class Helpers:
     if os.path.isfile(file_path) and '.' in os.path.basename(file_path):
       return os.path.basename(file_path).split('.')[-1]
     return ''
+  
+  @staticmethod
+  def remove_file_extension(file_path):
+    if os.path.isfile(file_path) and '.' in os.path.basename(file_path):
+      split_file_path = file_path.split('.')
+      split_file_path.pop()
+      return ".".join(split_file_path)
+    return file_path
   
   @staticmethod
   def get_renamed_item_path(original_file_path, project_name, new_base_name):
